@@ -1,4 +1,4 @@
-package sales.agent.salesagent;
+package integrations.telex.salesagent;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
