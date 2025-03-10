@@ -5,11 +5,28 @@ Sales Agent is an Integration for Telex Web App that allows users to find leads 
 The project is structured as follows:
 ```bash
 sales-agent
-|-- src
-|   |-- main
-|   |   |-- java
-|   |   |   |-- integrations.telex.salesagent
-|   |   |   |   |-- SalesAgentApplication.java
+├── src
+│   ├── main
+│   │   ├── java
+│   │   │   └── integrations
+│   │   │       └── telex
+│   │   │           └── salesagent
+│   │   │               ├── SalesAgentApplication.java
+│   │   │               ├── controller
+│   │   │               │   └── SalesAgentController.java
+│   │   │               ├── service
+│   │   │               │   └── SalesAgentService.java
+│   │   ├── resources
+            └── application.properties
+│   └── test
+│       ├── java
+│       │   └── integrations
+│       │       └── telex
+│       │           └── salesagent
+│       │               ├── controller
+│       │               │   └── SalesAgentControllerTest.java
+│       │               ├── service
+│       │               │   └── SalesAgentServiceTest.java
 ```
 
 ## Getting Started
