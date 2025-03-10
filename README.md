@@ -1,0 +1,2 @@
+# Sales Agent Integration
+Sales Agent is an Integration for Telex Web App that allows users to find leads and increase interactions. It allows users to set up their criteria and get leads that match those criteria. A Cron job runs every day to query apollo.io API which returns links to leads and stores them in the database. The integration utilizes Mistral AI to draft personalized emails to the leads and send them out. The integration also allows users to track the status of the emails sent out and the responses received.
