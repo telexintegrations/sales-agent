@@ -17,7 +17,7 @@ sales-agent
 │   │   │               ├── service
 │   │   │               │   └── SalesAgentService.java
 │   │   ├── resources
-            └── application.properties
+            └── application-example.properties
 │   └── test
 │       ├── java
 │       │   └── integrations
