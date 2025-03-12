@@ -19,8 +19,7 @@ public record CreateSearchCriteria(
         String email,
 
         @JsonProperty("lead_type")
-        @NotEmpty(message = "Lead type is required")
-        @Size(min = 1, message = "Lead type is required")
-        List<String> leadType
+        @NotBlank(message = "Lead type is required")
+        String leadType
 ) {
 }
