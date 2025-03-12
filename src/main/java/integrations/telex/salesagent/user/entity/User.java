@@ -25,6 +25,11 @@ public class User {
     @Column(name = "leadType", nullable = false)
     private String leadType;
 
+    public User(String companyName, String email, String leadType) {
+        this.companyName = companyName;
+        this.email = email;
+        this.leadType = leadType;
+    }
 
     @PrePersist
     public void prePersist() {
@@ -33,3 +38,4 @@ public class User {
         }
     }
 }
+
