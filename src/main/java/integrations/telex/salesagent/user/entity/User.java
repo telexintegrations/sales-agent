@@ -1,6 +1,5 @@
 package integrations.telex.salesagent.user.entity;
 
-import integrations.telex.salesagent.user.enums.LeadType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
