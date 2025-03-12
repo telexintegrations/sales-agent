@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
-import java.util.List;
 
 @Data
 @Entity
@@ -23,9 +22,8 @@ public class User {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "leadType", nullable = false)
-    private List<String> leadType;
+    private String leadType;
 
 
     @PrePersist
