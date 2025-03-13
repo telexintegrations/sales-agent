@@ -1,6 +1,7 @@
 package integrations.telex.salesagent.lead.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
 import lombok.Data;
 
 @Data
@@ -14,5 +15,11 @@ public class LeadDTO {
 
     @JsonProperty("lead_name")
     private String leadName;
+
+    @JsonProperty("lead_industry")
+    private String industry;
+
+    @JsonProperty("linkedin")
+    private String linkedInUrl;
 
 }
