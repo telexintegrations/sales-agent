@@ -31,7 +31,7 @@ public class TelexClient {
     }
 
 
-    public void processTelexPayload(String payload) {
+    public void processTelexPayload(String payload) throws JsonProcessingException {
         Map<String, Object> telexPayload = new HashMap<>();
         String message = "Success! " + payload + " new leads have been found.";
 
