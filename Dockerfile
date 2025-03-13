@@ -25,7 +25,7 @@ FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
 # Copy the built JAR file from the builder stage
-COPY --from=builder /app/target/telex-bamboohr-integration-*.jar app.jar
+COPY --from=builder /app/target/sales-agent-*.jar app.jar
 
 # Expose the port your app runs on (change 8080 if your app uses a different port)
 EXPOSE 8080
