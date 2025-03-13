@@ -21,7 +21,7 @@ public class TelexClient {
     private final ObjectMapper objectMapper;
     private final FormatTelexMessage formatTelexMessage;
 
-    private void sendToTelexChannel(String message) {
+    public void sendToTelexChannel(String message) {
         try {
             restTemplate.postForObject(appConfig.getTelexWebhookUrl() + appConfig.getTelexChannelId(), message, String.class);
             log.info("Sent message to Telex: {}", message);

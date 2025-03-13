@@ -90,13 +90,12 @@ public class LeadService {
             return ResponseEntity.internalServerError().body(error.getMessage());
         }
     }
-    public /*ResponseEntity<?>*/ void domainSearch() {
+    public void domainSearch() {
         try {
             var user = userRepository.findByChannelId(appConfig.getTelexChannelId());
 
             if (user.isEmpty()) {
                 throw new RuntimeException("User not found");
-                //return ResponseEntity.badRequest().body("User not found");
             }
 
             String domain = user.get().getLeadType();
@@ -141,13 +140,16 @@ public class LeadService {
                     .toList();
 
             // Send the new leads to Telex
-            newLeads.forEach(lead -> {
-                try {
-                    telexClient.processTelexPayload(objectMapper.writeValueAsString(lead));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+//            newLeads.forEach(lead -> {
+//                try {
+//                    telexClient.processTelexPayload(objectMapper.writeValueAsString(lead));
+//                } catch (JsonProcessingException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            });
+
+            String message = "Success! " + newLeads.size() + " new leads have been found.";
+            telexClient.sendToTelexChannel(message);
 
             leadRepository.saveAll(newLeads);
             log.info("Saved {} new leads", newLeads.size());
