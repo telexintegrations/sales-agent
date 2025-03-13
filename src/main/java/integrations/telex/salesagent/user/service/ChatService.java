@@ -83,7 +83,7 @@ public class ChatService {
     }
 
     private void callDomainSearchEndpoint() {
-        String url = "http://localhost:8080/api/v1/leads/domain-search";
+        String url = "https://sales-agent-3wyf.onrender.com/integration.json/api/v1/leads/domain-search";
         try {
             String response = restTemplate.getForObject(url, String.class);
             log.info("Response from domain-search endpoint: {}", response);
