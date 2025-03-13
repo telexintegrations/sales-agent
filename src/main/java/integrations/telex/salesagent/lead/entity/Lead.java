@@ -1,14 +1,19 @@
 package integrations.telex.salesagent.lead.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Data
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name="leads")
 public class Lead {
     @Id
@@ -22,6 +27,12 @@ public class Lead {
 
     @Column
     private String company;
+
+    @Column
+    private String industry;
+
+    @Column(name = "linkedin_url")
+    private String linkedInUrl;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
