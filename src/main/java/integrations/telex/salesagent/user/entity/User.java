@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -24,6 +26,13 @@ public class User {
 
     @Column(name = "leadType", nullable = false)
     private String leadType;
+
+    @Column(name = "channel_id", nullable = false)
+    private String channelId;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
     public User(String companyName, String email, String leadType) {
         this.companyName = companyName;

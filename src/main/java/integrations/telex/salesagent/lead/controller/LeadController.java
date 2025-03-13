@@ -52,12 +52,16 @@ public class LeadController {
     /**
      * Performs a domain search.
      *
-     * @param domain the domain to search for
      * @return the search results
      */
+//    @GetMapping("/domain-search")
+//    public ResponseEntity<?> domainSearch() {
+//        return ResponseEntity.ok(leadService.domainSearch());
+//    }
+
     @GetMapping("/domain-search")
-    public ResponseEntity<?> domainSearch(@RequestBody DomainFinder domain) {
-        return ResponseEntity.ok(leadService.domainSearch(domain));
+    public void domainSearch() {
+        leadService.domainSearch();
     }
 
     /**

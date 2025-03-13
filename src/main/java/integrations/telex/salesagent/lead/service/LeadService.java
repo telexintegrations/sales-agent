@@ -3,13 +3,17 @@ package integrations.telex.salesagent.lead.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import integrations.telex.salesagent.config.AppConfig;
 import integrations.telex.salesagent.config.OkHttpConfig;
 import integrations.telex.salesagent.lead.dto.DomainFinder;
 import integrations.telex.salesagent.lead.dto.EmailFinderRequest;
 import integrations.telex.salesagent.lead.dto.LeadDTO;
 import integrations.telex.salesagent.lead.entity.Lead;
 import integrations.telex.salesagent.lead.repository.LeadRepository;
+import integrations.telex.salesagent.telex.service.TelexClient;
+import integrations.telex.salesagent.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -20,16 +24,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Service class for managing leads.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LeadService {
@@ -43,6 +51,12 @@ public class LeadService {
     private final OkHttpClient okHttpClient;
 
     private final ObjectMapper objectMapper;
+
+    private final UserRepository userRepository;
+
+    private final AppConfig appConfig;
+
+    private final TelexClient telexClient;
 
     /**
      * Retrieves all leads with pagination.
@@ -76,20 +90,26 @@ public class LeadService {
             return ResponseEntity.internalServerError().body(error.getMessage());
         }
     }
-    public ResponseEntity<?> domainSearch(DomainFinder domainFinder) {
+    public /*ResponseEntity<?>*/ void domainSearch() {
         try {
+            var user = userRepository.findByChannelId(appConfig.getTelexChannelId());
+
+            if (user.isEmpty()) {
+                throw new RuntimeException("User not found");
+                //return ResponseEntity.badRequest().body("User not found");
+            }
+
+            String domain = user.get().getLeadType();
+            String userId = user.get().getId();
+
             String key = okHttpConfig.hunterParams().getApikey();
             String baseUrl = okHttpConfig.hunterParams().getBaseUrl();
+
             String uri = baseUrl + "/domain-search?" +
-                    "domain={domain}&company={company}&limit={limit}" +
-                    "&offset={offset}&type={type}&seniority={seniority}" +
-                    "&department={department}&required_field={requiredField}&api_key={key}";
+                    "domain={" + domain + "}&api_key={" + key + "}";
 
             ResponseEntity<?> response = restClient.get()
-                    .uri(uri, domainFinder.getDomain(), domainFinder.getCompany(),
-                            domainFinder.getLimit(), domainFinder.getOffset(), domainFinder.getType(),
-                            domainFinder.getSeniority(), domainFinder.getDepartment(),
-                            domainFinder.getRequiredField(), key)
+                    .uri(uri, domain, key)
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
                     .toEntity(String.class);
@@ -105,12 +125,33 @@ public class LeadService {
                         .linkedInUrl(email.get("linkedin").asText())
                         .company(jsonNode.get("data").get("organization").asText())
                         .industry(jsonNode.get("data").get("industry").asText())
+                        .userId(userId)
                         .build();
                 leads.add(lead);
             });
 
-            leads.forEach(leadRepository::save);
-            return ResponseEntity.ok(leads);
+            // Get all existing emails from the database
+            Set<String> existingEmails = leadRepository.findAll().stream()
+                            .map(Lead::getEmail)
+                                    .collect(Collectors.toSet());
+
+            // Filter out leads with emails already in the database
+            List<Lead> newLeads = leads.stream()
+                    .filter(lead -> !existingEmails.contains(lead.getEmail()))
+                    .toList();
+
+            // Send the new leads to Telex
+            newLeads.forEach(lead -> {
+                try {
+                    telexClient.processTelexPayload(objectMapper.writeValueAsString(lead));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            leadRepository.saveAll(newLeads);
+            log.info("Saved {} new leads", newLeads.size());
+            //return ResponseEntity.ok(leads);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
