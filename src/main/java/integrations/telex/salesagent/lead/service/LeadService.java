@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import integrations.telex.salesagent.config.AppConfig;
 import integrations.telex.salesagent.config.OkHttpConfig;
-import integrations.telex.salesagent.lead.dto.DomainFinder;
 import integrations.telex.salesagent.lead.dto.EmailFinderRequest;
 import integrations.telex.salesagent.lead.dto.LeadDTO;
 import integrations.telex.salesagent.lead.entity.Lead;
@@ -24,7 +23,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -138,15 +136,6 @@ public class LeadService {
             List<Lead> newLeads = leads.stream()
                     .filter(lead -> !existingEmails.contains(lead.getEmail()))
                     .toList();
-
-            // Send the new leads to Telex
-//            newLeads.forEach(lead -> {
-//                try {
-//                    telexClient.processTelexPayload(objectMapper.writeValueAsString(lead));
-//                } catch (JsonProcessingException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            });
 
             telexClient.processTelexPayload(newLeads.size());
 
