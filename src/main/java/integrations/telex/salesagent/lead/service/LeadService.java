@@ -137,7 +137,7 @@ public class LeadService {
                     .filter(lead -> !existingEmails.contains(lead.getEmail()))
                     .toList();
 
-            telexClient.processTelexPayload(newLeads.size());
+            telexClient.processTelexPayload(Integer.toString(newLeads.size()));
 
             leadRepository.saveAll(newLeads);
             log.info("Saved {} new leads", newLeads.size());
