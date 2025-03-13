@@ -21,7 +21,7 @@ public class TelexClient {
     private final ObjectMapper objectMapper;
     private final FormatTelexMessage formatTelexMessage;
 
-    public void sendToTelexChannel(String message) {
+    private void sendToTelexChannel(String message) {
         try {
             restTemplate.postForObject(appConfig.getTelexWebhookUrl() + appConfig.getTelexChannelId(), message, String.class);
             log.info("Sent message to Telex: {}", message);
@@ -31,13 +31,14 @@ public class TelexClient {
     }
 
 
-    public void processTelexPayload(String payload) throws JsonProcessingException {
+    public void processTelexPayload(String payload) {
         Map<String, Object> telexPayload = new HashMap<>();
+        String message = "Success! " + payload + " new leads have been found.";
 
         telexPayload.put("event_name", "new_lead");
         telexPayload.put("username", "sales_agent");
         telexPayload.put("status", "success");
-        telexPayload.put("message", payload);
+        telexPayload.put("message", message);
 
         sendToTelexChannel(objectMapper.writeValueAsString(telexPayload));
     }

@@ -148,8 +148,7 @@ public class LeadService {
 //                }
 //            });
 
-            String message = "Success! " + newLeads.size() + " new leads have been found.";
-            telexClient.sendToTelexChannel(message);
+            telexClient.processTelexPayload(newLeads.size());
 
             leadRepository.saveAll(newLeads);
             log.info("Saved {} new leads", newLeads.size());
