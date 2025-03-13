@@ -1,17 +1,23 @@
 package integrations.telex.salesagent.user.service;
 
+import integrations.telex.salesagent.config.AppConfig;
 import integrations.telex.salesagent.user.entity.User;
 import integrations.telex.salesagent.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatService {
+    private final AppConfig appConfig;
     private final UserRepository userRepository;
+    private final RestTemplate restTemplate;
     private final Map<String, String[]> userConversations = new HashMap<>();
     private final Map<String, Boolean> userStarted = new HashMap<>();
 
@@ -38,18 +44,22 @@ public class ChatService {
                         User already exists in the database.
                         Please type 'start' to begin a new conversation.""";
             }
-            return "What is your company name?";
+            return """
+                    What is the company name?
+                    Please provide the company you're looking for e.g. linkedin.
+                    """;
         } else if (responses[1] == null) {
             responses[1] = message;
             userConversations.put(sender, responses);
             return """
                     What type of lead are you looking for?
-                    Please provide one of the following options:
-                    people or company.""";
+                    Enter the domain name of the lead e.g. linkedin.com""";
         } else if (responses[2] == null) {
             responses[2] = message;
             saveUser(responses);
             resetConversation(sender);
+
+            callDomainSearchEndpoint();
             return """
                     Thank you for your information. Your responses have been saved.
                     Please type 'start' to begin a new conversation.""";
@@ -63,11 +73,22 @@ public class ChatService {
         user.setEmail(responses[0]);
         user.setCompanyName(responses[1]);
         user.setLeadType(responses[2]);
+        user.setChannelId(appConfig.getTelexChannelId());
         userRepository.save(user);
     }
 
     private void resetConversation(String sender) {
         userConversations.remove(sender);
         userStarted.remove(sender);
+    }
+
+    private void callDomainSearchEndpoint() {
+        String url = "http://localhost:8080/api/v1/leads/domain-search";
+        try {
+            String response = restTemplate.getForObject(url, String.class);
+            log.info("Response from domain-search endpoint: {}", response);
+        } catch (Exception e) {
+            log.error("Error calling domain-search endpoint: {}", e.getMessage(), e);
+        }
     }
 }

@@ -81,7 +81,9 @@
 </head>
 <body>
 <div id="chat-container">
-    <div id="messages"></div>
+    <div id="messages">
+        <p>Please type 'start' to begin a new conversation.</p>
+    </div>
     <div class="input-container">
         <input type="text" id="message" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
         <button onclick="sendMessage()">Send</button>

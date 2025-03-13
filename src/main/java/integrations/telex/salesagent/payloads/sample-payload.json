@@ -1,0 +1,6 @@
+{
+  "event_name": "new_lead",
+  "message": "{\"id\":null,\"userId\":\"30ecfc18-98e1-40d9-a5ad-729a0f4df2dc\",\"name\":\"Prabhakar Reddy\",\"email\":\"preddy@linkedin.com\",\"company\":\"LinkedIn\",\"industry\":\"Software Development\",\"linkedInUrl\":\"https://www.linkedin.com/in/prabhakar-reddy-77799431\",\"createdAt\":null}",
+  "username": "sales_agent",
+  "status": "success"
+}
