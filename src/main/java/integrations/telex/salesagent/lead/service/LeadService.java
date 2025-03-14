@@ -10,6 +10,7 @@ import integrations.telex.salesagent.lead.dto.LeadDTO;
 import integrations.telex.salesagent.lead.entity.Lead;
 import integrations.telex.salesagent.lead.repository.LeadRepository;
 import integrations.telex.salesagent.telex.service.TelexClient;
+import integrations.telex.salesagent.user.dto.request.SalesAgentPayload;
 import integrations.telex.salesagent.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,9 +89,10 @@ public class LeadService {
             return ResponseEntity.internalServerError().body(error.getMessage());
         }
     }
-    public void domainSearch() {
+    public void domainSearch(SalesAgentPayload payload) {
         try {
-            var user = userRepository.findByChannelId(appConfig.getTelexChannelId());
+            //var user = userRepository.findByChannelId(appConfig.getTelexChannelId());
+            var user = userRepository.findByChannelId(payload.channel_id());
 
             if (user.isEmpty()) {
                 throw new RuntimeException("User not found");
@@ -137,11 +139,12 @@ public class LeadService {
                     .filter(lead -> !existingEmails.contains(lead.getEmail()))
                     .toList();
 
-            telexClient.processTelexPayload(Integer.toString(newLeads.size()));
+            for (Lead lead: newLeads) {
+                telexClient.processTelexPayload(payload, lead);
+            }
 
             leadRepository.saveAll(newLeads);
             log.info("Saved {} new leads", newLeads.size());
-            //return ResponseEntity.ok(leads);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

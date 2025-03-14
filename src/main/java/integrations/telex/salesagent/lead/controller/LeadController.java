@@ -5,6 +5,7 @@ import integrations.telex.salesagent.lead.dto.EmailFinderRequest;
 import integrations.telex.salesagent.lead.dto.LeadDTO;
 import integrations.telex.salesagent.lead.entity.Lead;
 import integrations.telex.salesagent.lead.service.LeadService;
+import integrations.telex.salesagent.user.dto.request.SalesAgentPayload;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -54,14 +55,9 @@ public class LeadController {
      *
      * @return the search results
      */
-//    @GetMapping("/domain-search")
-//    public ResponseEntity<?> domainSearch() {
-//        return ResponseEntity.ok(leadService.domainSearch());
-//    }
-
     @GetMapping("/domain-search")
-    public void domainSearch() {
-        leadService.domainSearch();
+    public void domainSearch(SalesAgentPayload payload) {
+        leadService.domainSearch(payload);
     }
 
     /**

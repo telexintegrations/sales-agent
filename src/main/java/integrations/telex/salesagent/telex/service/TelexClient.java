@@ -3,7 +3,10 @@ package integrations.telex.salesagent.telex.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import integrations.telex.salesagent.config.AppConfig;
+import integrations.telex.salesagent.lead.entity.Lead;
 import integrations.telex.salesagent.telex.util.FormatTelexMessage;
+import integrations.telex.salesagent.user.dto.request.SalesAgentPayload;
+import integrations.telex.salesagent.user.dto.request.TelexPayload;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,26 +24,26 @@ public class TelexClient {
     private final ObjectMapper objectMapper;
     private final FormatTelexMessage formatTelexMessage;
 
-    private void sendToTelexChannel(String message) {
+    public void sendToTelexChannel(SalesAgentPayload payload, String message) {
         try {
-            String telexWebhook = appConfig.getTelexWebhookUrl() + appConfig.getTelexChannelId();
+            if (payload.channel_id() == null || payload.message() == null) {
+                throw new IllegalArgumentException("Channel ID or message is are required");
+            }
+            String telexWebhook = appConfig.getTelexWebhookUrl() + payload.channel_id();
             restTemplate.postForObject(telexWebhook, message, String.class);
-            log.info("Sent message to Telex: {}", message);
+
+            log.info("Sent message to Telex channel: {}", payload.channel_id());
         } catch (Exception e) {
             log.error("Failed to send message to Telex", e);
         }
     }
 
+    public void processTelexPayload(SalesAgentPayload payload, Lead lead) throws JsonProcessingException {
+        String message = formatTelexMessage.formatNewLeadMessage(lead);
 
-    public void processTelexPayload(String payload) throws JsonProcessingException {
-        Map<String, Object> telexPayload = new HashMap<>();
-        String message = "Success! " + payload + " new leads have been found.";
+        TelexPayload telexPayload = new TelexPayload("New Lead Alert", "Sales Agent", "success", message);
 
-        telexPayload.put("event_name", "new_lead");
-        telexPayload.put("username", "sales_agent");
-        telexPayload.put("status", "success");
-        telexPayload.put("message", message);
-
-        sendToTelexChannel(objectMapper.writeValueAsString(telexPayload));
+        sendToTelexChannel(payload, objectMapper.writeValueAsString(telexPayload));
     }
+
 }
