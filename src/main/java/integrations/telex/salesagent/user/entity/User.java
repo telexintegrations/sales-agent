@@ -34,12 +34,6 @@ public class User {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    public User(String companyName, String email, String leadType) {
-        this.companyName = companyName;
-        this.email = email;
-        this.leadType = leadType;
-    }
-
     @PrePersist
     public void prePersist() {
         if (this.id == null) {
