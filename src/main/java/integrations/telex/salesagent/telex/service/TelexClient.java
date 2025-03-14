@@ -3,6 +3,7 @@ package integrations.telex.salesagent.telex.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import integrations.telex.salesagent.config.AppConfig;
+import integrations.telex.salesagent.lead.entity.Lead;
 import integrations.telex.salesagent.telex.util.FormatTelexMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,10 +32,9 @@ public class TelexClient {
         }
     }
 
-
-    public void processTelexPayload(String payload) throws JsonProcessingException {
+    public void processTelexPayload(Lead payload) throws JsonProcessingException {
         Map<String, Object> telexPayload = new HashMap<>();
-        String message = "Success! " + payload + " new leads have been found.";
+        String message = formatTelexMessage.formatNewLeadMessage(payload);
 
         telexPayload.put("event_name", "new_lead");
         telexPayload.put("username", "sales_agent");
@@ -43,4 +43,17 @@ public class TelexClient {
 
         sendToTelexChannel(objectMapper.writeValueAsString(telexPayload));
     }
+
+
+//    public void processTelexPayload(String payload) throws JsonProcessingException {
+//        Map<String, Object> telexPayload = new HashMap<>();
+//        String message = "Success! " + payload + " new leads have been found.";
+//
+//        telexPayload.put("event_name", "new_lead");
+//        telexPayload.put("username", "sales_agent");
+//        telexPayload.put("status", "success");
+//        telexPayload.put("message", message);
+//
+//        sendToTelexChannel(objectMapper.writeValueAsString(telexPayload));
+//    }
 }

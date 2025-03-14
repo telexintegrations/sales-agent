@@ -54,11 +54,6 @@ public class LeadController {
      *
      * @return the search results
      */
-//    @GetMapping("/domain-search")
-//    public ResponseEntity<?> domainSearch() {
-//        return ResponseEntity.ok(leadService.domainSearch());
-//    }
-
     @GetMapping("/domain-search")
     public void domainSearch() {
         leadService.domainSearch();

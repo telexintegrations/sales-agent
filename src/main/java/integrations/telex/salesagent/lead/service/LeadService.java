@@ -137,11 +137,12 @@ public class LeadService {
                     .filter(lead -> !existingEmails.contains(lead.getEmail()))
                     .toList();
 
-            telexClient.processTelexPayload(Integer.toString(newLeads.size()));
+            for (Lead lead: newLeads) {
+                telexClient.processTelexPayload(lead);
+            }
 
             leadRepository.saveAll(newLeads);
             log.info("Saved {} new leads", newLeads.size());
-            //return ResponseEntity.ok(leads);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
