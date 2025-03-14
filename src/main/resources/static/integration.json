@@ -5,7 +5,7 @@
       "updated_at": "2025-03-13"
     },
     "descriptions": {
-      "app_name": "sales-agent",
+      "app_name": "Sales Agent",
       "app_description": "Sales Agent Integration for the Telex App. It is responsible for querying external APIs to find leads.",
       "app_logo": "https://sales-agent-3wyf.onrender.com/agent.jpg",
       "app_url": "https://sales-agent-3wyf.onrender.com",
@@ -17,13 +17,13 @@
     "key_features": [
       "agent"
     ],
-    "author": "aniebiet afia",
+    "author": "sales agent",
     "settings": [
       {
         "label": "interval",
         "type": "text",
         "required": true,
-        "default": "******"
+        "default": "*****"
       },
       {
         "label": "channel_id",

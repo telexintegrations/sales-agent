@@ -23,7 +23,8 @@ public class TelexClient {
 
     private void sendToTelexChannel(String message) {
         try {
-            restTemplate.postForObject(appConfig.getTelexWebhookUrl() + appConfig.getTelexChannelId(), message, String.class);
+            String telexWebhook = appConfig.getTelexWebhookUrl() + appConfig.getTelexChannelId();
+            restTemplate.postForObject(telexWebhook, message, String.class);
             log.info("Sent message to Telex: {}", message);
         } catch (Exception e) {
             log.error("Failed to send message to Telex", e);
