@@ -34,7 +34,11 @@ public class ChatController {
 
     @PostMapping("/tick")
     public void salesAgent(SalesAgentPayload payload) throws JsonProcessingException {
-        chatService.processTelexPayload(payload);
-        //return ResponseEntity.ok(chatService.processMessage(payload.getSender(), payload.getMessage()));
+        chatService.processMessage(payload);
+    }
+
+    @PostMapping("/webhook")
+    public void webhook(SalesAgentPayload payload) throws JsonProcessingException {
+        chatService.processMessage(payload);
     }
 }

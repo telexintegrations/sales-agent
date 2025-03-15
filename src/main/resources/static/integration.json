@@ -46,7 +46,7 @@
         "default": "linkedin.com"
       }
     ],
-    "target_url": "https://sales-agent-3wyf.onrender.com/api/v1/sales-agent",
+    "target_url": "https://sales-agent-3wyf.onrender.com/api/v1/sales-agent/webhook",
     "tick_url": "https://sales-agent-3wyf.onrender.com/api/v1/sales-agent/tick"
   }
 }
