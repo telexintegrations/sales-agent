@@ -36,24 +36,11 @@ public class TelexClient {
         Map<String, Object> telexPayload = new HashMap<>();
         String message = formatTelexMessage.formatNewLeadMessage(payload);
 
-        telexPayload.put("event_name", "new_lead");
-        telexPayload.put("username", "sales_agent");
+        telexPayload.put("event_name", "New Lead Alert");
+        telexPayload.put("username", "Sales Agent");
         telexPayload.put("status", "success");
         telexPayload.put("message", message);
 
         sendToTelexChannel(objectMapper.writeValueAsString(telexPayload));
     }
-
-
-//    public void processTelexPayload(String payload) throws JsonProcessingException {
-//        Map<String, Object> telexPayload = new HashMap<>();
-//        String message = "Success! " + payload + " new leads have been found.";
-//
-//        telexPayload.put("event_name", "new_lead");
-//        telexPayload.put("username", "sales_agent");
-//        telexPayload.put("status", "success");
-//        telexPayload.put("message", message);
-//
-//        sendToTelexChannel(objectMapper.writeValueAsString(telexPayload));
-//    }
 }
