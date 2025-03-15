@@ -2,29 +2,25 @@ package integrations.telex.salesagent.user.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import integrations.telex.salesagent.config.AppConfig;
+import integrations.telex.salesagent.telex.service.TelexClient;
 import integrations.telex.salesagent.user.dto.request.SalesAgentPayload;
-import integrations.telex.salesagent.user.dto.request.Setting;
 import integrations.telex.salesagent.user.entity.User;
 import integrations.telex.salesagent.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatService {
-    private final AppConfig appConfig;
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
-    private final Map<String, String[]> userConversations = new HashMap<>();
-    private final Map<String, Boolean> userStarted = new HashMap<>();
+    private final List<String> userResponses;
+    private final TelexClient telexClient;
 
 //    public String processMessage(String sender, String message) {
 //        if (!userStarted.containsKey(sender) || !userStarted.get(sender)) {
@@ -73,32 +69,58 @@ public class ChatService {
 //        return "You have already provided all the required information.";
 //    }
 
-    public void processTelexPayload(SalesAgentPayload payload) throws JsonProcessingException {
-//        List<Setting> settings = payload.settings();
-//        Map<String, String> responses = new HashMap<>();
-//        for (Setting setting : settings) {
-//            responses.put(setting.label(), setting.defaultValue());
-//        }
-//
-//        if (userRepository.findByEmail(responses.get("Email")).isPresent()) {
-//            return;
-//        }
+    public void processMessage(SalesAgentPayload payload) throws JsonProcessingException {
+        // message to display if payload.message() is includes /start
+        String instruction;
+        if (payload.message().contains("/start")) {
+            instruction = """
+                    Welcome! Please provide your business email address.
+                    e.g. test@example.com
+                    """;
 
-        log.info("Processing Telex Payload {}", payload);
+            // send the message to the user
+            telexClient.sendToTelexChannel(payload, instruction);
+        }
+
+        // check if entry is an email address, add to userResponses list
+        if (payload.message().contains("@")) {
+            userResponses.add(payload.message());
+            instruction = """
+                    What is the company name?
+                    Please provide the company you're looking for e.g. linkedin.
+                    """;
+            telexClient.sendToTelexChannel(payload, instruction);
+        }
+
+        // check if entry is not empty, add to userResponses list
+        if (!payload.message().isEmpty()) {
+            userResponses.add(payload.message());
+            instruction = """
+                    What type of lead are you looking for?
+                    Enter the domain name of the lead e.g. linkedin.com
+                    """;
+            telexClient.sendToTelexChannel(payload, instruction);
+        }
+
+        // check if entry is not empty, add to userResponses list
+        if (!payload.message().isEmpty()) {
+            userResponses.add(payload.message());
+            saveUser(userResponses, payload);
+            callDomainSearchEndpoint();
+            instruction = """
+                    Thank you for your information. Your responses have been saved.
+                    """;
+            telexClient.sendToTelexChannel(payload, instruction);
+        }
     }
 
-    private void saveUser(String[] responses) {
+    private void saveUser(List<String> responses, SalesAgentPayload payload) {
         User user = new User();
-        user.setEmail(responses[0]);
-        user.setCompanyName(responses[1]);
-        user.setLeadType(responses[2]);
-        user.setChannelId(appConfig.getTelexChannelId());
+        user.setEmail(responses.get(0));
+        user.setCompanyName(responses.get(1));
+        user.setLeadType(responses.get(2));
+        user.setChannelId(payload.channel_id());
         userRepository.save(user);
-    }
-
-    private void resetConversation(String sender) {
-        userConversations.remove(sender);
-        userStarted.remove(sender);
     }
 
     private void callDomainSearchEndpoint() {
