@@ -1,8 +1,8 @@
 {
   "data": {
     "date": {
-      "created_at": "2025-03-13",
-      "updated_at": "2025-03-13"
+      "created_at": "2025-03-15",
+      "updated_at": "2025-03-15"
     },
     "descriptions": {
       "app_name": "Sales Agent",
@@ -15,7 +15,9 @@
     "integration_type": "interval",
     "integration_category": "Marketing Automation",
     "key_features": [
-      "agent"
+      "sales agent",
+      "leads",
+      "marketing"
     ],
     "author": "sales agent",
     "settings": [
@@ -26,13 +28,24 @@
         "default": "*****"
       },
       {
-        "label": "channel_id",
+        "label": "email",
         "type": "text",
         "required": true,
-        "default": "01959005-23c3-778e-ac4e-fd39dbe0bf61"
+        "default": "test@example.com"
+      },
+      {
+        "label": "company",
+        "type": "text",
+        "required": true,
+        "default": "linkedin"
+      },
+      {
+        "label": "domain",
+        "type": "text",
+        "required": true,
+        "default": "linkedin.com"
       }
     ],
-    "target_url": "https://sales-agent-3wyf.onrender.com/integration.json",
-    "tick_url": "https://sales-agent-3wyf.onrender.com/agent"
+    "tick_url": "https://sales-agent-3wyf.onrender.com/api/v1/sales-agent/tick"
   }
 }
