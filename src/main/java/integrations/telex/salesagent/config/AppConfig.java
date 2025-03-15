@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 public class AppConfig {
     private final String telexChannelId = "019590a4-b83d-7846-8876-9beb5a5bcffb";
 
-    @Value("${spring.telex.webhook.url}")
+    @Value("${spring.telex.webhook.url:}")
     private String telexWebhookUrl;
 
     @Bean
