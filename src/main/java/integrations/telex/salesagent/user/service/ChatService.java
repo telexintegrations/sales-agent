@@ -1,17 +1,22 @@
 package integrations.telex.salesagent.user.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import integrations.telex.salesagent.config.AppConfig;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import integrations.telex.salesagent.telex.service.TelexClient;
-import integrations.telex.salesagent.user.dto.request.SalesAgentPayload;
+import integrations.telex.salesagent.user.dto.request.SalesAgentPayloadDTO;
+import integrations.telex.salesagent.user.dto.request.TelexPayload;
 import integrations.telex.salesagent.user.entity.User;
 import integrations.telex.salesagent.user.repository.UserRepository;
+import integrations.telex.salesagent.user.utils.RequestFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -19,102 +24,71 @@ import java.util.List;
 public class ChatService {
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
+    private final RequestFormatter requestFormatter;
     private final List<String> userResponses;
     private final TelexClient telexClient;
+    ObjectMapper objectMapper = new ObjectMapper();
 
-//    public String processMessage(String sender, String message) {
-//        if (!userStarted.containsKey(sender) || !userStarted.get(sender)) {
-//            if ("start".equalsIgnoreCase(message)) {
-//                userStarted.put(sender, true);
-//                userConversations.put(sender, new String[3]);
-//                return "Welcome! Please provide your business email address.";
-//            } else {
-//                return "Please type 'start' to begin the conversation.";
-//            }
-//        }
-//
-//        String[] responses = userConversations.get(sender);
-//
-//        if (responses[0] == null) {
-//            responses[0] = message;
-//            userConversations.put(sender, responses);
-//
-//            if (userRepository.findByEmail(message).isPresent()) {
-//                resetConversation(sender);
-//                return """
-//                        User already exists in the database.
-//                        Please type 'start' to begin a new conversation.""";
-//            }
-//            return """
-//                    What is the company name?
-//                    Please provide the company you're looking for e.g. linkedin.
-//                    """;
-//        } else if (responses[1] == null) {
-//            responses[1] = message;
-//            userConversations.put(sender, responses);
-//            return """
-//                    What type of lead are you looking for?
-//                    Enter the domain name of the lead e.g. linkedin.com""";
-//        } else if (responses[2] == null) {
-//            responses[2] = message;
-//            saveUser(responses);
-//            resetConversation(sender);
-//
-//            callDomainSearchEndpoint();
-//            return """
-//                    Thank you for your information. Your responses have been saved.
-//                    Please type 'start' to begin a new conversation.""";
-//        }
-//
-//        return "You have already provided all the required information.";
-//    }
+    public void processMessage(String payload) throws JsonProcessingException {
+        JsonNode jsonNode = objectMapper.readTree(payload);
+        String htmlMessage = jsonNode.get("message").asText();
+        String message = requestFormatter.stripHtml(htmlMessage);
+        String channelId = jsonNode.get("channel_id").asText();
 
-    public void processMessage(SalesAgentPayload payload) throws JsonProcessingException {
-        // message to display if payload.message() is includes /start
-        String instruction;
-        if (payload.message().contains("/start")) {
-            instruction = """
-                    Welcome! Please provide your business email address.
-                    e.g. test@example.com
-                    """;
+        // Ensure the first message is always /start
+        if (userResponses.isEmpty()) {
+            if (!message.contains("/start")) {
+                sendInstruction(channelId, "Invalid Command. Please type /start to begin the process.");
+                
+            }
+            userResponses.add("/start");
 
-            // send the message to the user
-            telexClient.sendToTelexChannel(payload, instruction);
+            sendInstruction(channelId, "Welcome! Please provide your business email address.\n e.g.");
+            
         }
 
-        // check if entry is an email address, add to userResponses list
-        if (payload.message().contains("@")) {
-            userResponses.add(payload.message());
-            instruction = """
-                    What is the company name?
-                    Please provide the company you're looking for e.g. linkedin.
-                    """;
-            telexClient.sendToTelexChannel(payload, instruction);
+        // Ensure the second message is a valid email
+        if (userResponses.size() == 1) {
+            if (!isValidEmail(message)) {
+                sendInstruction(channelId, "Invalid Email Address. Please provide a valid email address.");
+                
+            }
+            if (userRepository.findByEmail(message).isPresent()) {
+                sendInstruction(channelId, "Email already exists. Please provide a different email address.");
+                
+            }
+            userResponses.add(message);
+            sendInstruction(channelId, "Please provide the company you're looking for starting with the word Company\n e.g. Company: linkedin.");
+           
         }
 
-        // check if entry is not empty, add to userResponses list
-        if (!payload.message().isEmpty()) {
-            userResponses.add(payload.message());
-            instruction = """
-                    What type of lead are you looking for?
-                    Enter the domain name of the lead e.g. linkedin.com
-                    """;
-            telexClient.sendToTelexChannel(payload, instruction);
-        }
-
-        // check if entry is not empty, add to userResponses list
-        if (!payload.message().isEmpty()) {
-            userResponses.add(payload.message());
-            saveUser(userResponses, payload);
-            callDomainSearchEndpoint();
-            instruction = """
-                    Thank you for your information. Your responses have been saved.
-                    """;
-            telexClient.sendToTelexChannel(payload, instruction);
+        // Ensure the third message is a valid company name
+        if (userResponses.size() == 2) {
+            if (!message.startsWith("Company:")) {
+                sendInstruction(channelId, "Please provide the company you're looking for starting with the word Company\n e.g. Company: linkedin.");
+                
+            }
+            userResponses.add(message);
+            sendInstruction(channelId, "What type of lead are you looking for?\nEnter the domain name of the lead e.g. linkedin.com");
         }
     }
 
-    private void saveUser(List<String> responses, SalesAgentPayload payload) {
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
+        return Pattern.compile(emailRegex).matcher(email).matches();
+    }
+
+    private void sendInstruction(String channelId, String instruction) throws JsonProcessingException {
+        TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "success", instruction);
+        instruction = instruction + "\n Sales Agent Bot"; 
+        if(instruction.contains("Sales Agent Bot")) {
+            return;
+        }
+        telexClient.sendToTelexChannel(channelId, objectMapper.writeValueAsString(telexPayload));
+    }
+
+
+    private void saveUser(List<String> responses, SalesAgentPayloadDTO payload) {
         User user = new User();
         user.setEmail(responses.get(0));
         user.setCompanyName(responses.get(1));

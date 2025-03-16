@@ -10,10 +10,14 @@ import org.springframework.web.client.RestTemplate;
 @Getter
 @Configuration
 public class AppConfig {
-    private final String telexChannelId = "019590a4-b83d-7846-8876-9beb5a5bcffb";
-
-    @Value("${spring.telex.webhook.url}")
+    @Value("${telex.webhook.url}")
     private String telexWebhookUrl;
+
+    @Value("${sandbox.baseURL}")
+    private String sandboxBaseURL;
+
+    @Value("${production.baseURL}")
+    private String productionBaseURL;
 
     @Bean
     public RestTemplate restTemplate() {
