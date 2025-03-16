@@ -1,11 +1,10 @@
 package integrations.telex.salesagent.lead.controller;
 
-import integrations.telex.salesagent.lead.dto.DomainFinder;
 import integrations.telex.salesagent.lead.dto.EmailFinderRequest;
 import integrations.telex.salesagent.lead.dto.LeadDTO;
 import integrations.telex.salesagent.lead.entity.Lead;
 import integrations.telex.salesagent.lead.service.LeadService;
-import integrations.telex.salesagent.user.dto.request.SalesAgentPayload;
+import integrations.telex.salesagent.user.dto.request.SalesAgentPayloadDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,8 +13,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
 
 /**
  * REST controller for managing leads.
@@ -56,7 +53,7 @@ public class LeadController {
      * @return the search results
      */
     @GetMapping("/domain-search")
-    public void domainSearch(SalesAgentPayload payload) {
+    public void domainSearch(SalesAgentPayloadDTO payload) {
         leadService.domainSearch(payload);
     }
 
