@@ -3,6 +3,7 @@ package integrations.telex.salesagent.user.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import integrations.telex.salesagent.config.AppConfig;
 import integrations.telex.salesagent.telex.service.TelexClient;
 import integrations.telex.salesagent.user.dto.request.SalesAgentPayloadDTO;
 import integrations.telex.salesagent.user.dto.request.TelexPayload;
@@ -23,6 +24,7 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class ChatService {
     private final UserRepository userRepository;
+    private final AppConfig appConfig;
     private final RestTemplate restTemplate;
     private final RequestFormatter requestFormatter;
     private final List<String> userResponses;
@@ -39,12 +41,12 @@ public class ChatService {
         if (userResponses.isEmpty()) {
             if (!message.contains("/start")) {
                 sendInstruction(channelId, "Invalid Command. Please type /start to begin the process.");
-                
+                return;
             }
             userResponses.add("/start");
 
             sendInstruction(channelId, "Welcome! Please provide your business email address.\n e.g.");
-            
+            return;
         }
 
         // Ensure the second message is a valid email
@@ -79,12 +81,14 @@ public class ChatService {
     }
 
     private void sendInstruction(String channelId, String instruction) throws JsonProcessingException {
-        TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "success", instruction);
-        instruction = instruction + "\n Sales Agent Bot"; 
+        instruction = instruction + "\n Sales Agent Bot";
         if(instruction.contains("Sales Agent Bot")) {
             return;
         }
-        telexClient.sendToTelexChannel(channelId, objectMapper.writeValueAsString(telexPayload));
+        TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "success", instruction);
+//        telexClient.sendToTelexChannel(channelId, objectMapper.writeValueAsString(telexPayload));
+        restTemplate.postForObject(appConfig.getTelexWebhookUrl()+ channelId, objectMapper.writeValueAsString(telexPayload), String.class);
+        return;
     }
 
 
