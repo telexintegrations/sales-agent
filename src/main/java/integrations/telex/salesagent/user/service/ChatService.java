@@ -102,10 +102,11 @@ public class ChatService {
                 failedInstruction(channelId, instruction);
                 return;
             }
-            userResponses.add(message);
+            String extractedDomain = message.replace("Domain: ", "");
+            userResponses.add(extractedDomain);
             saveUser(userResponses, channelId);
-            callDomainSearchEndpoint(channelId);
             userResponses.clear();
+            callDomainSearchEndpoint(channelId);
         }
     }
 
@@ -130,7 +131,7 @@ public class ChatService {
     private void saveUser(List<String> responses, String channelId) {
         User user = new User();
         user.setEmail(responses.get(1));
-        user.setCompanyName(responses.get(2).replace("Company: ", ""));
+        user.setCompanyName(responses.get(2));
         user.setLeadType(responses.get(3));
         user.setChannelId(channelId);
         userRepository.save(user);
