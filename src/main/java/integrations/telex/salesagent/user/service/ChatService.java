@@ -35,6 +35,11 @@ public class ChatService {
         String message = requestFormatter.stripHtml(htmlMessage);
         String channelId = jsonNode.get("channel_id").asText();
 
+        // Ignore messages from the bot
+        if (message.contains("Sales Agent Bot")) {
+            return;
+        }
+
         // Ensure the first message is always /start
         if (userResponses.isEmpty()) {
             if (!message.contains("/start")) {
@@ -46,7 +51,7 @@ public class ChatService {
             String instruction = "Welcome! Please provide your business email address." +
                     "\n e.g. test@example.com";
             sendInstruction(channelId, instruction);
-
+            return;
         }
 
         // Ensure the second message is a valid email
@@ -105,19 +110,11 @@ public class ChatService {
 
     private void sendInstruction(String channelId, String instruction) throws JsonProcessingException {
         TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "success", instruction);
-        String signedInstruction = instruction + "\n\nSales Agent Bot";
-        if(signedInstruction.contains("Sales Agent Bot")) {
-            return;
-        }
         telexClient.sendToTelexChannel(channelId, objectMapper.writeValueAsString(telexPayload));
     }
 
     private void failedInstruction(String channelId, String instruction) throws JsonProcessingException {
         TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "failed", instruction);
-        String signedInstruction = instruction + "\n\nSales Agent Bot";
-        if(signedInstruction.contains("Sales Agent Bot")) {
-            return;
-        }
         telexClient.sendToTelexChannel(channelId, objectMapper.writeValueAsString(telexPayload));
     }
 
