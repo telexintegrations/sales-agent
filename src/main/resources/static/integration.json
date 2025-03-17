@@ -22,22 +22,10 @@
     "author": "sales agent",
     "settings": [
       {
-        "label": "email",
+        "label": "interval",
         "type": "text",
         "required": true,
-        "default": "test@example.com"
-      },
-      {
-        "label": "company",
-        "type": "text",
-        "required": true,
-        "default": "linkedin"
-      },
-      {
-        "label": "domain",
-        "type": "text",
-        "required": true,
-        "default": "linkedin.com"
+        "default": "* * * * *"
       }
     ],
     "target_url": "https://sales-agent-3wyf.onrender.com/webhook",
