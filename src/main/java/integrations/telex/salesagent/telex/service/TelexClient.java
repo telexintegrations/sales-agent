@@ -24,10 +24,9 @@ public class TelexClient {
     public void sendToTelexChannel(String channelID, String message) {
         try {
             String telexWebhook = appConfig.getTelexWebhookUrl() + channelID;
-            log.info("Telex webhook: {}", telexWebhook);
-            String signedMessage = message + "\n\nSales Agent Bot";
-            restTemplate.postForObject(telexWebhook, signedMessage, String.class);
-            log.info("Sent message to Telex channel: {} with message: {}", channelID, signedMessage);
+
+            restTemplate.postForObject(telexWebhook, message, String.class);
+            log.info("Sent message to Telex channel: {} with message: {}", channelID, message);
         } catch (Exception e) {
             log.error("Failed to send message to Telex", e);
         }

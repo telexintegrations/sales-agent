@@ -56,6 +56,7 @@ public class ChatService {
 
         // Ensure the second message is a valid email
         if (userResponses.size() == 1) {
+            String extractedEmail = message.replace("Email: ", "");
             if (!isValidEmail(message)) {
                 String instruction = "Invalid Email Address. Please provide a valid email address.";
                 failedInstruction(channelId, instruction);
@@ -112,7 +113,8 @@ public class ChatService {
     }
 
     private void sendInstruction(String channelId, String instruction) throws JsonProcessingException {
-        TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "success", instruction);
+        String signedMessage = instruction + "\n\nSales Agent Bot";
+        TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "success", signedMessage);
         telexClient.sendToTelexChannel(channelId, objectMapper.writeValueAsString(telexPayload));
     }
 
