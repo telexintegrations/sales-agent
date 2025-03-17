@@ -21,12 +21,6 @@
     ],
     "author": "sales agent",
     "settings": [
-      {
-        "label": "interval",
-        "type": "text",
-        "required": true,
-        "default": "* * * * *"
-      }
     ],
     "target_url": "https://sales-agent-3wyf.onrender.com/webhook",
     "tick_url": "https://sales-agent-3wyf.onrender.com/tick"
