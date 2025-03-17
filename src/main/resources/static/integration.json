@@ -8,7 +8,7 @@
       "app_name": "Sales Agent",
       "app_description": "Sales Agent Integration for the Telex App. It is responsible for querying external APIs to find leads.",
       "app_logo": "https://sales-agent-3wyf.onrender.com/agent.jpg",
-      "app_url": "https://sales-agent-3wyf.onrender.com",
+      "app_url": "https://3ngl9qs2-8080.uks1.devtunnels.ms",
       "background_color": "#fff"
     },
     "is_active": true,
@@ -40,7 +40,7 @@
         "default": "linkedin.com"
       }
     ],
-    "target_url": "https://sales-agent-3wyf.onrender.com/webhook",
-    "tick_url": "https://sales-agent-3wyf.onrender.com/tick"
+    "target_url": "https://3ngl9qs2-8080.uks1.devtunnels.ms/webhook",
+    "tick_url": "https://3ngl9qs2-8080.uks1.devtunnels.ms/tick"
   }
 }

@@ -38,58 +38,38 @@ public class ChatService {
         // Ensure the first message is always /start
         if (userResponses.isEmpty()) {
             if (!message.contains("/start")) {
-                String instruction = "Invalid Command. Please type /start to begin the process.";
-                failedInstruction(channelId, instruction);
+                sendInstruction(channelId, "Invalid Command. Please type /start to begin the process.");
+                
             }
             userResponses.add("/start");
-            String instruction = "Welcome! Please provide your business email address." +
-                    "\n e.g. test@example.com";
-            sendInstruction(channelId, instruction);
+
+            sendInstruction(channelId, "Welcome! Please provide your business email address.\n e.g.");
             
         }
 
         // Ensure the second message is a valid email
         if (userResponses.size() == 1) {
             if (!isValidEmail(message)) {
-                String instruction = "Invalid Email Address. Please provide a valid email address.";
-                failedInstruction(channelId, instruction);
+                sendInstruction(channelId, "Invalid Email Address. Please provide a valid email address.");
+                
             }
             if (userRepository.findByEmail(message).isPresent()) {
-                String instruction = "Email already exists. Please provide a different email address.";
-                failedInstruction(channelId, instruction);
+                sendInstruction(channelId, "Email already exists. Please provide a different email address.");
+                
             }
             userResponses.add(message);
-            String instruction = "Please provide the company you're looking for starting with the word Company\n e.g." +
-                    " " +
-                    "Company: linkedin.";
-            sendInstruction(channelId, instruction);
+            sendInstruction(channelId, "Please provide the company you're looking for starting with the word Company\n e.g. Company: linkedin.");
            
         }
 
         // Ensure the third message is a valid company name
         if (userResponses.size() == 2) {
             if (!message.startsWith("Company:")) {
-                String instruction = "Please provide the company you're looking for starting with the word Company\n " +
-                        "e.g. Company: linkedin.";
-                failedInstruction(channelId, instruction);
+                sendInstruction(channelId, "Please provide the company you're looking for starting with the word Company\n e.g. Company: linkedin.");
                 
             }
             userResponses.add(message);
-            String instruction = "What type of lead are you looking for?\nEnter the domain name of the lead e.g. " +
-                    "linkedin.com";
-            sendInstruction(channelId, instruction);
-        }
-
-        // Ensure the fourth message is a valid domain name
-        if (userResponses.size() == 3) {
-            if (!message.contains(".com") && !message.contains(".org") && !message.contains(".net")) {
-                String instruction = "Invalid Domain Name. Please provide a valid domain name.";
-                failedInstruction(channelId, instruction);
-            }
-            userResponses.add(message);
-            saveUser(userResponses, channelId);
-            callDomainSearchEndpoint();
-            userResponses.clear();
+            sendInstruction(channelId, "What type of lead are you looking for?\nEnter the domain name of the lead e.g. linkedin.com");
         }
     }
 
@@ -100,29 +80,20 @@ public class ChatService {
 
     private void sendInstruction(String channelId, String instruction) throws JsonProcessingException {
         TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "success", instruction);
-        String signedInstruction = instruction + "\nSales Agent Bot";
-        if(signedInstruction.contains("Sales Agent Bot")) {
-            return;
-        }
-        telexClient.sendToTelexChannel(channelId, objectMapper.writeValueAsString(telexPayload));
-    }
-
-    private void failedInstruction(String channelId, String instruction) throws JsonProcessingException {
-        TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "failed", instruction);
-        String signedInstruction = instruction + "\nSales Agent Bot";
-        if(signedInstruction.contains("Sales Agent Bot")) {
+        instruction = instruction + "\n Sales Agent Bot"; 
+        if(instruction.contains("Sales Agent Bot")) {
             return;
         }
         telexClient.sendToTelexChannel(channelId, objectMapper.writeValueAsString(telexPayload));
     }
 
 
-    private void saveUser(List<String> responses, String channelId) {
+    private void saveUser(List<String> responses, SalesAgentPayloadDTO payload) {
         User user = new User();
-        user.setEmail(responses.get(1));
-        user.setCompanyName(responses.get(2).replace("Company: ", ""));
-        user.setLeadType(responses.get(3));
-        user.setChannelId(channelId);
+        user.setEmail(responses.get(0));
+        user.setCompanyName(responses.get(1));
+        user.setLeadType(responses.get(2));
+        user.setChannelId(payload.channel_id());
         userRepository.save(user);
     }
 
