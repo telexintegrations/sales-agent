@@ -19,7 +19,7 @@ public class ChatController {
 
     @PostMapping("/tick")
     public void salesAgent(@RequestBody String payload) throws JsonProcessingException {
-        chatService.processMessage(payload);
+//        chatService.processMessage(payload);
     }
 
     @PostMapping("/webhook")
