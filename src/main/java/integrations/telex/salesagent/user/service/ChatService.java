@@ -50,7 +50,6 @@ public class ChatService {
             userResponses.add("/start");
             String instruction = "Welcome! Please provide your business email address starting with Email." +
                     "\n e.g. Email: test@example.com";
-            log.info(userResponses.toString());
             sendInstruction(channelId, instruction);
             return;
         }
@@ -125,7 +124,7 @@ public class ChatService {
 
     private void saveUser(List<String> responses, String channelId) {
         User user = new User();
-        user.setEmail(responses.get(1));
+        user.setEmail(responses.get(1).replace("Email: ", ""));
         user.setCompanyName(responses.get(2).replace("Company: ", ""));
         user.setLeadType(responses.get(3));
         user.setChannelId(channelId);
