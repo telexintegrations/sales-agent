@@ -1,0 +1,6 @@
+{
+  "event_name": "KYC",
+  "username": "Sales Agent Bot",
+  "status": "success",
+  "message": "What type of lead are you looking for?\nEnter the domain name of the lead e.g. linkedin.com"
+}
