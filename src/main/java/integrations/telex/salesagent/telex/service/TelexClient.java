@@ -5,12 +5,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import integrations.telex.salesagent.config.AppConfig;
 import integrations.telex.salesagent.lead.entity.Lead;
 import integrations.telex.salesagent.telex.util.FormatTelexMessage;
-import integrations.telex.salesagent.user.dto.request.SalesAgentPayloadDTO;
 import integrations.telex.salesagent.user.dto.request.TelexPayload;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
 
 @Slf4j
 @Service
@@ -18,17 +23,23 @@ import org.springframework.web.client.RestTemplate;
 public class TelexClient {
     private final AppConfig appConfig;
     private final RestTemplate restTemplate;
+    private final OkHttpClient okHttpClient;
     private final ObjectMapper objectMapper;
     private final FormatTelexMessage formatTelexMessage;
 
-    public void sendToTelexChannel(String channelID, String message) {
-        try {
-            String telexWebhook = appConfig.getTelexWebhookUrl() + channelID;
-            log.info("Sending message to Telex channel: {}", channelID);
-            restTemplate.postForObject(telexWebhook, message, String.class);
-            log.info("Sent message to Telex channel: {}", channelID);
-        } catch (Exception e) {
-            log.error("Failed to send message to Telex", e);
+    public void sendToTelexChannel(String channel_id, TelexPayload payload) {
+        try{
+            RequestBody requestBody = RequestBody.create(payload.toJson(),null);
+            String url = "https://ping.telex.im/v1/webhooks/"+channel_id;
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(requestBody)
+                    .build();
+
+            Response response = okHttpClient.newCall(request).execute();
+            log.info("Response from Telex : {}",response);
+        }catch (RuntimeException | IOException e){
+            throw new RuntimeException(e);
         }
     }
 
@@ -37,7 +48,7 @@ public class TelexClient {
 
         TelexPayload telexPayload = new TelexPayload("New Lead Alert", "Sales Agent", "success", message);
 
-        sendToTelexChannel(channelID, objectMapper.writeValueAsString(telexPayload));
+        sendToTelexChannel(channelID, telexPayload);
     }
 
 }

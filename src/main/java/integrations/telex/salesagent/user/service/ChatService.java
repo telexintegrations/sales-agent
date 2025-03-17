@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -78,13 +77,13 @@ public class ChatService {
         return Pattern.compile(emailRegex).matcher(email).matches();
     }
 
-    private void sendInstruction(String channelId, String instruction) throws JsonProcessingException {
+    private void sendInstruction(String channelId, String instruction) {
         TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "success", instruction);
         instruction = instruction + "\n Sales Agent Bot"; 
         if(instruction.contains("Sales Agent Bot")) {
             return;
         }
-        telexClient.sendToTelexChannel(channelId, objectMapper.writeValueAsString(telexPayload));
+        telexClient.sendToTelexChannel(channelId,telexPayload);
     }
 
 

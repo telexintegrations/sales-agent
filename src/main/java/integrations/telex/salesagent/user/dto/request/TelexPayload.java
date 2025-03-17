@@ -7,4 +7,15 @@ public record TelexPayload(
         String status,
         String message
 ) {
+    public String toJson() {
+        return """
+        {
+            "event_name": "%s",
+            "username": "%s",
+            "status": "%s",
+            "message": "%s"
+        }
+        """.formatted(event_name, username, status, message);
+    }
+
 }
