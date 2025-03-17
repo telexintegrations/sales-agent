@@ -48,8 +48,8 @@ public class ChatService {
                 return;
             }
             userResponses.add("/start");
-            String instruction = "Welcome! Please provide your business email address." +
-                    "\n e.g. test@example.com";
+            String instruction = "Welcome! Please provide your business email address starting with Email." +
+                    "\n e.g. Email: test@example.com";
             log.info(userResponses.toString());
             sendInstruction(channelId, instruction);
             return;
@@ -78,7 +78,7 @@ public class ChatService {
 
         // Ensure the third message is a valid company name
         if (userResponses.size() == 2) {
-            if (!message.startsWith("Company:")) {
+            if (!message.startsWith("Company:".toLowerCase())) {
                 String instruction = "Please provide the company you're looking for starting with the word Company\n " +
                         "e.g. Company: linkedin.";
                 failedInstruction(channelId, instruction);
@@ -87,14 +87,14 @@ public class ChatService {
             userResponses.add(message);
             log.info(userResponses.toString());
             String instruction = "What type of lead are you looking for?\nEnter the domain name of the lead e.g. " +
-                    "linkedin.com";
+                    "Domain: linkedin.com";
             sendInstruction(channelId, instruction);
             return;
         }
 
         // Ensure the fourth message is a valid domain name
         if (userResponses.size() == 3) {
-            if (!message.contains(".com") && !message.contains(".org") && !message.contains(".net")) {
+            if (!message.contains("Domain".toLowerCase())) {
                 String instruction = "Invalid Domain Name. Please provide a valid domain name.";
                 failedInstruction(channelId, instruction);
                 return;
@@ -109,7 +109,7 @@ public class ChatService {
 
     private boolean isValidEmail(String email) {
         String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
-        return Pattern.compile(emailRegex).matcher(email).matches();
+        return Pattern.compile(emailRegex).matcher(email.replace("Email: ", "")).matches();
     }
 
     private void sendInstruction(String channelId, String instruction) throws JsonProcessingException {
