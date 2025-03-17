@@ -11,6 +11,7 @@ import integrations.telex.salesagent.lead.entity.Lead;
 import integrations.telex.salesagent.lead.repository.LeadRepository;
 import integrations.telex.salesagent.telex.service.TelexClient;
 import integrations.telex.salesagent.user.dto.request.SalesAgentPayloadDTO;
+import integrations.telex.salesagent.user.entity.User;
 import integrations.telex.salesagent.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,10 +28,7 @@ import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -89,11 +87,12 @@ public class LeadService {
             return ResponseEntity.internalServerError().body(error.getMessage());
         }
     }
-    public void domainSearch(SalesAgentPayloadDTO payload) {
+    public void domainSearch(String channelId) {
         try {
-            //var user = userRepository.findByChannelId(appConfig.getTelexChannelId());
-            var user = userRepository.findByChannelId(payload.channel_id());
+            Optional<User> user = userRepository.findByChannelId(channelId);
 
+            // TODO: if user does not exist, call sendToTelexChannel with an error message
+            // and then return
             if (user.isEmpty()) {
                 throw new RuntimeException("User not found");
             }
@@ -140,7 +139,7 @@ public class LeadService {
                     .toList();
 
             for (Lead lead: newLeads) {
-                telexClient.processTelexPayload(payload.channel_id(), lead);
+                telexClient.processTelexPayload(channelId, lead);
             }
 
             leadRepository.saveAll(newLeads);

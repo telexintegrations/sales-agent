@@ -54,7 +54,7 @@ public class LeadController {
      */
     @GetMapping("/domain-search")
     public void domainSearch(SalesAgentPayloadDTO payload) {
-        leadService.domainSearch(payload);
+        //leadService.domainSearch(payload);
     }
 
     /**

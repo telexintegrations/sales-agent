@@ -1,7 +1,6 @@
 package integrations.telex.salesagent.user.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import integrations.telex.salesagent.user.dto.request.SalesAgentPayloadDTO;
 import integrations.telex.salesagent.user.service.ChatService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,6 @@ public class ChatController {
 
     @PostMapping("/tick")
     public void salesAgent(@RequestBody String payload) throws JsonProcessingException {
-//        log.info("Telex Payload , {}", payload);
 //        chatService.processMessage(payload);
     }
 
@@ -29,10 +27,5 @@ public class ChatController {
         log.info("Telex Payload , {}", payload);
         chatService.processMessage(payload);
     }
-//    @PostMapping("/tick")
-//    public void salesAgent(@RequestBody SalesAgentPayloadDTO payload) throws JsonProcessingException {
-//        log.info("is telex working?");
-//        chatService.processMessage(payload);
-//    }
 
 }

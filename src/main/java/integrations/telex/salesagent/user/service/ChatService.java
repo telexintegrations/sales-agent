@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import integrations.telex.salesagent.config.AppConfig;
+import integrations.telex.salesagent.lead.service.LeadService;
 import integrations.telex.salesagent.telex.service.TelexClient;
-import integrations.telex.salesagent.user.dto.request.SalesAgentPayloadDTO;
 import integrations.telex.salesagent.user.dto.request.TelexPayload;
 import integrations.telex.salesagent.user.entity.User;
 import integrations.telex.salesagent.user.repository.UserRepository;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -24,12 +23,13 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class ChatService {
     private final UserRepository userRepository;
-    private final AppConfig appConfig;
     private final RestTemplate restTemplate;
     private final RequestFormatter requestFormatter;
     private final List<String> userResponses;
     private final TelexClient telexClient;
-    ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+    private final AppConfig appConfig;
+    private final LeadService leadService;
 
     public void processMessage(String payload) throws JsonProcessingException {
         JsonNode jsonNode = objectMapper.readTree(payload);
@@ -37,75 +37,113 @@ public class ChatService {
         String message = requestFormatter.stripHtml(htmlMessage);
         String channelId = jsonNode.get("channel_id").asText();
 
+        // Ignore messages from the bot
+        if (message.contains("Sales Agent Bot")) {
+            return;
+        }
+
         // Ensure the first message is always /start
         if (userResponses.isEmpty()) {
             if (!message.contains("/start")) {
-                sendInstruction(channelId, "Invalid Command. Please type /start to begin the process.");
+                String instruction = "Invalid Command. Please type /start to begin the process.";
+                failedInstruction(channelId, instruction);
                 return;
             }
             userResponses.add("/start");
-
-            sendInstruction(channelId, "Welcome! Please provide your business email address.\n e.g.");
+            String instruction = "Welcome! Please provide your business email address starting with Email." +
+                    "\n e.g. Email: test@example.com";
+            sendInstruction(channelId, instruction);
             return;
         }
 
         // Ensure the second message is a valid email
         if (userResponses.size() == 1) {
+            String extractedEmail = message.replace("Email: ", "");
+            log.info("Extracted email: {}", extractedEmail);
             if (!isValidEmail(message)) {
-                sendInstruction(channelId, "Invalid Email Address. Please provide a valid email address.");
-                
+                String instruction = "Invalid Email Address. Please provide a valid email address.";
+                failedInstruction(channelId, instruction);
+                return;
             }
             if (userRepository.findByEmail(message).isPresent()) {
-                sendInstruction(channelId, "Email already exists. Please provide a different email address.");
-                
+                String instruction = "Email already exists. Please provide a different email address.";
+                failedInstruction(channelId, instruction);
+                return;
             }
-            userResponses.add(message);
-            sendInstruction(channelId, "Please provide the company you're looking for starting with the word Company\n e.g. Company: linkedin.");
-           
+            userResponses.add(extractedEmail);
+            String instruction = "Please provide the company you're looking for starting with the word Company\n e.g." +
+                    " " +
+                    "Company: linkedin.";
+            sendInstruction(channelId, instruction);
+            return;
         }
 
         // Ensure the third message is a valid company name
         if (userResponses.size() == 2) {
-            if (!message.startsWith("Company:")) {
-                sendInstruction(channelId, "Please provide the company you're looking for starting with the word Company\n e.g. Company: linkedin.");
-                
+            if (!message.startsWith("Company: ")) {
+                String instruction = "Please provide the company you're looking for starting with the word Company\n " +
+                        "e.g. Company: linkedin.";
+                failedInstruction(channelId, instruction);
+                return;
             }
-            userResponses.add(message);
-            sendInstruction(channelId, "What type of lead are you looking for?\nEnter the domain name of the lead e.g. linkedin.com");
+            String extractedCompany = message.replace("Company: ", "");
+            userResponses.add(extractedCompany);
+            String instruction = "What type of lead are you looking for?\nEnter the domain name of the lead e.g. " +
+                    "Domain: linkedin.com";
+            log.info("User responses: {}", userResponses);
+            sendInstruction(channelId, instruction);
+            return;
+        }
+
+        // Ensure the fourth message is a valid domain name
+        if (userResponses.size() == 3) {
+            if (!message.contains("Domain: ")) {
+                String instruction = "Invalid Domain Name. Please provide a valid domain name.";
+                failedInstruction(channelId, instruction);
+                return;
+            }
+            String extractedDomain = message.replace("Domain: ", "");
+            userResponses.add(extractedDomain);
+            saveUser(userResponses, channelId);
+            userResponses.clear();
+            callDomainSearchEndpoint(channelId);
         }
     }
 
     private boolean isValidEmail(String email) {
         String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
-        return Pattern.compile(emailRegex).matcher(email).matches();
+        return Pattern.compile(emailRegex).matcher(email.replace("Email: ", "")).matches();
     }
 
     private void sendInstruction(String channelId, String instruction) throws JsonProcessingException {
-        instruction = instruction + "\n Sales Agent Bot";
-        if(instruction.contains("Sales Agent Bot")) {
-            return;
-        }
-        TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "success", instruction);
-//        telexClient.sendToTelexChannel(channelId, objectMapper.writeValueAsString(telexPayload));
-        restTemplate.postForObject(appConfig.getTelexWebhookUrl()+ channelId, objectMapper.writeValueAsString(telexPayload), String.class);
-        return;
+        String signedMessage = instruction + "\n\nSales Agent Bot";
+        TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "success", signedMessage);
+        telexClient.sendToTelexChannel(channelId, objectMapper.writeValueAsString(telexPayload));
+    }
+
+    private void failedInstruction(String channelId, String instruction) throws JsonProcessingException {
+        String signedMessage = instruction + "\n\nSales Agent Bot";
+        TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "failed", signedMessage);
+        telexClient.sendToTelexChannel(channelId, objectMapper.writeValueAsString(telexPayload));
     }
 
 
-    private void saveUser(List<String> responses, SalesAgentPayloadDTO payload) {
+    private void saveUser(List<String> responses, String channelId) {
         User user = new User();
-        user.setEmail(responses.get(0));
-        user.setCompanyName(responses.get(1));
-        user.setLeadType(responses.get(2));
-        user.setChannelId(payload.channel_id());
+        user.setEmail(responses.get(1));
+        user.setCompanyName(responses.get(2));
+        user.setLeadType(responses.get(3));
+        user.setChannelId(channelId);
         userRepository.save(user);
     }
 
-    private void callDomainSearchEndpoint() {
-        String url = "https://sales-agent-3wyf.onrender.com/api/v1/leads/domain-search";
+    private void callDomainSearchEndpoint(String channelId) {
+//        String url = appConfig.getProductionBaseURL() + "/api/v1/leads/domain-search";
+
         try {
-            String response = restTemplate.getForObject(url, String.class);
-            log.info("Response from domain-search endpoint: {}", response);
+            leadService.domainSearch(channelId);
+//            String response = restTemplate.getForObject(url, String.class);
+//            log.info("Response from domain-search endpoint: {}", response);
         } catch (Exception e) {
             log.error("Error calling domain-search endpoint: {}", e.getMessage(), e);
         }
