@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import integrations.telex.salesagent.config.AppConfig;
+import integrations.telex.salesagent.lead.service.LeadService;
 import integrations.telex.salesagent.telex.service.TelexClient;
 import integrations.telex.salesagent.user.dto.request.TelexPayload;
 import integrations.telex.salesagent.user.entity.User;
@@ -28,6 +29,7 @@ public class ChatService {
     private final TelexClient telexClient;
     private final ObjectMapper objectMapper;
     private final AppConfig appConfig;
+    private final LeadService leadService;
 
     public void processMessage(String payload) throws JsonProcessingException {
         JsonNode jsonNode = objectMapper.readTree(payload);
@@ -57,6 +59,7 @@ public class ChatService {
         // Ensure the second message is a valid email
         if (userResponses.size() == 1) {
             String extractedEmail = message.replace("Email: ", "");
+            log.info("Extracted email: {}", extractedEmail);
             if (!isValidEmail(message)) {
                 String instruction = "Invalid Email Address. Please provide a valid email address.";
                 failedInstruction(channelId, instruction);
@@ -67,8 +70,7 @@ public class ChatService {
                 failedInstruction(channelId, instruction);
                 return;
             }
-            userResponses.add(message);
-            log.info(userResponses.toString());
+            userResponses.add(extractedEmail);
             String instruction = "Please provide the company you're looking for starting with the word Company\n e.g." +
                     " " +
                     "Company: linkedin.";
@@ -78,31 +80,31 @@ public class ChatService {
 
         // Ensure the third message is a valid company name
         if (userResponses.size() == 2) {
-            if (!message.startsWith("Company:".toLowerCase())) {
+            if (!message.startsWith("Company: ")) {
                 String instruction = "Please provide the company you're looking for starting with the word Company\n " +
                         "e.g. Company: linkedin.";
                 failedInstruction(channelId, instruction);
                 return;
             }
-            userResponses.add(message);
-            log.info(userResponses.toString());
+            String extractedCompany = message.replace("Company: ", "");
+            userResponses.add(extractedCompany);
             String instruction = "What type of lead are you looking for?\nEnter the domain name of the lead e.g. " +
                     "Domain: linkedin.com";
+            log.info("User responses: {}", userResponses);
             sendInstruction(channelId, instruction);
             return;
         }
 
         // Ensure the fourth message is a valid domain name
         if (userResponses.size() == 3) {
-            if (!message.contains("Domain".toLowerCase())) {
+            if (!message.contains("Domain: ")) {
                 String instruction = "Invalid Domain Name. Please provide a valid domain name.";
                 failedInstruction(channelId, instruction);
                 return;
             }
             userResponses.add(message);
-            log.info(userResponses.toString());
             saveUser(userResponses, channelId);
-            callDomainSearchEndpoint();
+            callDomainSearchEndpoint(channelId);
             userResponses.clear();
         }
     }
@@ -119,25 +121,28 @@ public class ChatService {
     }
 
     private void failedInstruction(String channelId, String instruction) throws JsonProcessingException {
-        TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "failed", instruction);
+        String signedMessage = instruction + "\n\nSales Agent Bot";
+        TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "failed", signedMessage);
         telexClient.sendToTelexChannel(channelId, objectMapper.writeValueAsString(telexPayload));
     }
 
 
     private void saveUser(List<String> responses, String channelId) {
         User user = new User();
-        user.setEmail(responses.get(1).replace("Email: ", ""));
+        user.setEmail(responses.get(1));
         user.setCompanyName(responses.get(2).replace("Company: ", ""));
         user.setLeadType(responses.get(3));
         user.setChannelId(channelId);
         userRepository.save(user);
     }
 
-    private void callDomainSearchEndpoint() {
-        String url = appConfig.getProductionBaseURL() + "/api/v1/leads/domain-search";
+    private void callDomainSearchEndpoint(String channelId) {
+//        String url = appConfig.getProductionBaseURL() + "/api/v1/leads/domain-search";
+
         try {
-            String response = restTemplate.getForObject(url, String.class);
-            log.info("Response from domain-search endpoint: {}", response);
+            leadService.domainSearch(channelId);
+//            String response = restTemplate.getForObject(url, String.class);
+//            log.info("Response from domain-search endpoint: {}", response);
         } catch (Exception e) {
             log.error("Error calling domain-search endpoint: {}", e.getMessage(), e);
         }
