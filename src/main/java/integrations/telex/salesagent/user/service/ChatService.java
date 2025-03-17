@@ -26,7 +26,7 @@ public class ChatService {
     private final RequestFormatter requestFormatter;
     private final List<String> userResponses;
     private final TelexClient telexClient;
-    ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
     private final AppConfig appConfig;
 
     public void processMessage(String payload) throws JsonProcessingException {
@@ -50,6 +50,7 @@ public class ChatService {
             userResponses.add("/start");
             String instruction = "Welcome! Please provide your business email address." +
                     "\n e.g. test@example.com";
+            log.info(userResponses.toString());
             sendInstruction(channelId, instruction);
             return;
         }
@@ -67,6 +68,7 @@ public class ChatService {
                 return;
             }
             userResponses.add(message);
+            log.info(userResponses.toString());
             String instruction = "Please provide the company you're looking for starting with the word Company\n e.g." +
                     " " +
                     "Company: linkedin.";
@@ -83,6 +85,7 @@ public class ChatService {
                 return;
             }
             userResponses.add(message);
+            log.info(userResponses.toString());
             String instruction = "What type of lead are you looking for?\nEnter the domain name of the lead e.g. " +
                     "linkedin.com";
             sendInstruction(channelId, instruction);
@@ -97,6 +100,7 @@ public class ChatService {
                 return;
             }
             userResponses.add(message);
+            log.info(userResponses.toString());
             saveUser(userResponses, channelId);
             callDomainSearchEndpoint();
             userResponses.clear();
