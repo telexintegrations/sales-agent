@@ -29,7 +29,8 @@ public class TelexClient {
 
     public void sendToTelexChannel(String channel_id, TelexPayload payload) {
         try{
-            RequestBody requestBody = RequestBody.create(payload.toJson(),null);
+            String body = objectMapper.writeValueAsString(payload.toJson());
+            RequestBody requestBody = RequestBody.create(body,null);
             String url = "https://ping.telex.im/v1/webhooks/"+channel_id;
             Request request = new Request.Builder()
                     .url(url)
