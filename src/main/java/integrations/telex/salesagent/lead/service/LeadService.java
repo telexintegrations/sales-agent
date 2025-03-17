@@ -91,6 +91,8 @@ public class LeadService {
         try {
             Optional<User> user = userRepository.findByChannelId(channelId);
 
+            // TODO: if user does not exist, call sendToTelexChannel with an error message
+            // and then return
             if (user.isEmpty()) {
                 throw new RuntimeException("User not found");
             }
