@@ -1,14 +1,18 @@
 package integrations.telex.salesagent.user.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import integrations.telex.salesagent.telex.service.TelexService;
 import integrations.telex.salesagent.user.service.ChatService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,6 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class ChatController {
     private final ChatService chatService;
+    private final TelexService telexService;
+
+    @GetMapping("/integration.json")
+    public Map<String, Object> getIntegrationJson() {
+        return telexService.getTelexJsonConfig();
+    }
 
     @PostMapping("/tick")
     public void salesAgent(@RequestBody String payload) throws JsonProcessingException {

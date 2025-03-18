@@ -47,6 +47,7 @@ public class ChatService {
             if (!message.contains("/start")) {
                 String instruction = "Invalid Command. Please type /start to begin the process.";
                 failedInstruction(channelId, instruction);
+                userResponses.clear();
                 return;
             }
             userResponses.add("/start");
@@ -61,12 +62,14 @@ public class ChatService {
             String extractedEmail = message.replace("Email: ", "");
             log.info("Extracted email: {}", extractedEmail);
             if (!isValidEmail(message)) {
-                String instruction = "Invalid Email Address. Please provide a valid email address.";
+                String instruction = "Invalid Email Address. Please provide a valid email address.\n" +
+                        "e.g. Email: test@example.com";
                 failedInstruction(channelId, instruction);
                 return;
             }
-            if (userRepository.findByEmail(message).isPresent()) {
-                String instruction = "Email already exists. Please provide a different email address.";
+            if (userRepository.findByEmail(extractedEmail).isPresent()) {
+                String instruction = "Email already exists. Please provide a different email address.\n " +
+                        "e.g. Email: test@exampl,e.com";
                 failedInstruction(channelId, instruction);
                 return;
             }
@@ -90,7 +93,6 @@ public class ChatService {
             userResponses.add(extractedCompany);
             String instruction = "What type of lead are you looking for?\nEnter the domain name of the lead e.g. " +
                     "Domain: linkedin.com";
-            log.info("User responses: {}", userResponses);
             sendInstruction(channelId, instruction);
             return;
         }
@@ -105,8 +107,16 @@ public class ChatService {
             String extractedDomain = message.replace("Domain: ", "");
             userResponses.add(extractedDomain);
             saveUser(userResponses, channelId);
+
+            String instruction = "Your search criteria have been saved. We will notify you when we find leads matching your criteria.";
+            sendInstruction(channelId, instruction);
+
             userResponses.clear();
             callDomainSearchEndpoint(channelId);
+
+            // Clear the message and channelId
+            message = "";
+            channelId = "";
         }
     }
 
@@ -123,7 +133,7 @@ public class ChatService {
 
     private void failedInstruction(String channelId, String instruction) throws JsonProcessingException {
         String signedMessage = instruction + "\n\nSales Agent Bot";
-        TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "failed", signedMessage);
+        TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "error", signedMessage);
         telexClient.sendToTelexChannel(channelId, objectMapper.writeValueAsString(telexPayload));
     }
 
@@ -138,14 +148,6 @@ public class ChatService {
     }
 
     private void callDomainSearchEndpoint(String channelId) {
-//        String url = appConfig.getProductionBaseURL() + "/api/v1/leads/domain-search";
-
-        try {
-            leadService.domainSearch(channelId);
-//            String response = restTemplate.getForObject(url, String.class);
-//            log.info("Response from domain-search endpoint: {}", response);
-        } catch (Exception e) {
-            log.error("Error calling domain-search endpoint: {}", e.getMessage(), e);
-        }
+        leadService.domainSearch(channelId);
     }
 }
