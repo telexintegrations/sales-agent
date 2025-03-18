@@ -14,10 +14,25 @@ Sales Agent Integration introduces a cutting-edge solution for business owners t
 
 
 ## How It Works
+### Telex Setup and activating the Sales Agent
+#### Steps
+1. **Sign Up**: Sign up for a Telex account at [Telex](https://telex.im).
+2. **Create an Organisation**: Create an organisation on the Telex platform.
+   ![Step 1: Create Organisation](src/main/resources/static/telex-setup/1.png)
+3. **Create a Channel**: Create a channel in the organisation.
+   ![Step 2: Create Channel](src/main/resources/static/telex-setup/2.png)
+4. **Add the Sales Agent**: Click on `Apps`, then click on `Add New` to add the Sales Agent to the channel.
+![Step 3: Add Sales Agent Integration](src/main/resources/static/telex-setup/3.png)
+5. **Sales Agent Integration**: Enter this URL `https://sales-agent-3wyf.onrender.com/integration.json` in the `Integration Json Url` field and click `Save`.
+6. **Activate the Sales Agent**: Click on `the toggle button` to activate the Sales Agent in the channel.
+7. **Confugure the Sales Agent**: Click on the `Manage App` button to configure the Sales Agent.
+8. **Set the Custom Channel**: Click on the `Output` tab -> Custom Channels -> Add Custom Channel -> Select the channel you want to see the output.
+![Step 4: Activate Sales Agent](src/main/resources/static/telex-setup/4.png)
+9. You're all set! The Sales Agent is now active in the channel.
 
-### Chat Interaction
+### Sales Agent Chat Interaction
 
-The chat interaction between business owners and the sales agent takes place on the telex channels and is handled by the `ChatService` class  which processes messages, validates inputs, and guides users through a structured flow to collect information for lead generation. Below is a breakdown of the interaction steps:
+The chat interaction between business owners and the sales agent takes place in the telex channel and is handled by the `ChatService` class  which processes messages, validates inputs, and guides users through a structured flow to collect information for lead generation. Below is a breakdown of the interaction steps:
 
 #### Interaction Flow
 
@@ -25,24 +40,24 @@ The chat interaction between business owners and the sales agent takes place on 
     - Users begin the process by sending the `/start` command.
     - The system responds with a welcome message and prompts users to provide their business email address.
 
-       ![Step 1: Starting the Process](src/main/resources/static/start.png)
+       ![Step 1: Starting the Process](src/main/resources/static/sales-agent/1.png)
 
 2. **Email Validation**:
     - The system validates the provided email address using a regex pattern.
-      ![Step 2: Email Validation](src/main/resources/static/successEmailValidation.png)
+      ![Step 2: Accepted Email](src/main/resources/static/sales-agent/3.png)
     - If the email is invalid or already exists in the system, an appropriate message is displayed.
    
-      ![Step 2: Email Validation](src/main/resources/static/failedEmailValidation.png)
+      ![Step 3: Email Validation](src/main/resources/static/sales-agent/2.png)
 3. **Company Information**:
     - Users are prompted to specify the company they are targeting by starting their response with `Company:` (e.g., `Company: linkedin`).
     - Input is validated to ensure it follows the required format.
 
-      ![Step 3: Company Information](src/main/resources/static/companyName.png)
+      ![Step 3: Company Information](src/main/resources/static/sales-agent/4.png)
 
 4. **Lead Type**:
     - Users specify the type of lead they need by providing the lead's domain name (e.g., `linkedin.com`).
 
-      ![Step 4: Lead Type](src/main/resources/static/lead.png)
+      ![Step 4: Lead Type](src/main/resources/static/sales-agent/5.png)
 
 5. **Automated Instructions**:
     - Clear and friendly instructions are sent at every step of the process.
@@ -54,6 +69,16 @@ The chat interaction between business owners and the sales agent takes place on 
    
 7. **Domain Search Integration**:
     - The service triggers the `domain-search` endpoint of the lead generation API to fetch leads matching the specified criteria.
+
+8. **Success Notification**: 
+    - Upon successful lead retrieval, the system sends a notification to the user via the Telex channel with all the leads found.
+
+      ![Step 8: Leads Found](src/main/resources/static/sales-agent/new-lead-1.png)
+      ![Step 8: Leads Found](src/main/resources/static/sales-agent/new-lead-2.png)
+      ![Step 8: Leads Found](src/main/resources/static/sales-agent/new-lead-3.png)
+   ![Step 8: Leads Found](src/main/resources/static/sales-agent/new-lead-4.png)
+      ![Step 8: Leads Found](src/main/resources/static/sales-agent/new-lead-5.png)
+      ![Step 8: Leads Found](src/main/resources/static/sales-agent/new-lead-6.png)
 
 ### Lead Search Integration
 
