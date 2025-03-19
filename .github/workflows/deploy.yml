@@ -1,0 +1,25 @@
+name: Deploy to Render
+
+on:
+  pull_request:
+    branches:
+      - dev
+
+permissions:
+  contents: read
+  deployments: write
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+
+      - name: Trigger Render Deployment
+        run: |
+          curl -X POST "$RENDER_DEPLOY_HOOK"
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}

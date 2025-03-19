@@ -91,10 +91,10 @@ public class LeadService {
         try {
             Optional<User> user = userRepository.findByChannelId(channelId);
 
-            // TODO: if user does not exist, call sendToTelexChannel with an error message
-            // and then return
             if (user.isEmpty()) {
-                throw new RuntimeException("User not found");
+                String message = "User not found. Please provide a valid user.";
+                telexClient.failedInstruction(channelId, message);
+                return;
             }
 
             String domain = user.get().getLeadType();
@@ -134,8 +134,14 @@ public class LeadService {
                                     .collect(Collectors.toSet());
 
             // Filter out leads with emails already in the database
+//            List<Lead> newLeads = leads.stream()
+//                    .filter(lead -> !existingEmails.contains(lead.getEmail()))
+//                    .toList();
+
+            // Filter out leads with emails already linked to the user
             List<Lead> newLeads = leads.stream()
                     .filter(lead -> !existingEmails.contains(lead.getEmail()))
+                    .filter(lead -> !lead.getUserId().equals(userId))
                     .toList();
 
             for (Lead lead: newLeads) {
@@ -143,7 +149,6 @@ public class LeadService {
             }
 
             leadRepository.saveAll(newLeads);
-            log.info("Saved {} new leads", newLeads.size());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

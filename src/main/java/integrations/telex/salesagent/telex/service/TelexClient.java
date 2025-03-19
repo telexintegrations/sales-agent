@@ -40,4 +40,16 @@ public class TelexClient {
         sendToTelexChannel(channelID, objectMapper.writeValueAsString(telexPayload));
     }
 
+    public void sendInstruction(String channelId, String instruction) throws JsonProcessingException {
+        String signedMessage = instruction + "\n\nSales Agent Bot";
+        TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "success", signedMessage);
+        sendToTelexChannel(channelId, objectMapper.writeValueAsString(telexPayload));
+    }
+
+    public void failedInstruction(String channelId, String instruction) throws JsonProcessingException {
+        String signedMessage = instruction + "\n\nSales Agent Bot";
+        TelexPayload telexPayload = new TelexPayload("KYC", "Sales Agent Bot", "error", signedMessage);
+        sendToTelexChannel(channelId, objectMapper.writeValueAsString(telexPayload));
+    }
+
 }
