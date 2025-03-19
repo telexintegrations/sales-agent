@@ -107,12 +107,9 @@ public class ChatService {
             userResponses.add(extractedDomain);
             saveUser(userResponses, channelId);
 
-            String instruction = "Your search criteria have been saved. We will notify you when we find leads matching your criteria.";
-            telexClient.sendInstruction(channelId, instruction);
-            return;
+            channelResponses.remove(channelId);
+            callDomainSearchEndpoint(channelId);
         }
-        channelResponses.remove(channelId);
-        callDomainSearchEndpoint(channelId);
     }
 
     private boolean isValidEmail(String email) {
@@ -120,13 +117,17 @@ public class ChatService {
         return Pattern.compile(emailRegex).matcher(email.replace("Email: ", "")).matches();
     }
 
-    private void saveUser(List<String> responses, String channelId) {
+    private void saveUser(List<String> responses, String channelId) throws JsonProcessingException {
         User user = new User();
         user.setEmail(responses.get(1));
         user.setCompanyName(responses.get(2));
         user.setLeadType(responses.get(3));
         user.setChannelId(channelId);
         userRepository.save(user);
+
+//        String instruction = "Your search criteria have been saved. We will notify you when we find leads matching your criteria.";
+//        telexClient.sendInstruction(channelId, instruction);
+//        return;
     }
 
     private void callDomainSearchEndpoint(String channelId) {
