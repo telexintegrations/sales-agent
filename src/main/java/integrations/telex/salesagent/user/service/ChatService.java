@@ -45,16 +45,12 @@ public class ChatService {
             return;
         }
 
-        //channelResponses.putIfAbsent(channelId, new ArrayList<>());
-        //List<String> userResponses = channelResponses.get(channelId);
         List<String> userResponses = channelResponses.computeIfAbsent(channelId, k -> new ArrayList<>());
 
-        // Ensure the first message is always /start
         if (userResponses.isEmpty()) {
             if (!message.contains("/start")) {
                 String instruction = "Invalid Command. Please type /start to begin the process.";
                 telexClient.failedInstruction(channelId, instruction);
-                //channelResponses.remove(channelId);
                 return;
             }
             userResponses.add("/start");
@@ -64,7 +60,6 @@ public class ChatService {
             return;
         }
 
-        // Ensure the second message is a valid email
         if (userResponses.size() == 1) {
             String extractedEmail = message.replace("Email: ", "");
             if (!isValidEmail(message)) {
@@ -87,7 +82,6 @@ public class ChatService {
             return;
         }
 
-        // Ensure the third message is a valid company name
         if (userResponses.size() == 2) {
             if (!message.startsWith("Company: ")) {
                 String instruction = "Please provide the company you're looking for starting with the word Company\n " +
@@ -103,7 +97,6 @@ public class ChatService {
             return;
         }
 
-        // Ensure the fourth message is a valid domain name
         if (userResponses.size() == 3) {
             if (!message.contains("Domain: ")) {
                 String instruction = "Invalid Domain Name. Please provide a valid domain name.";

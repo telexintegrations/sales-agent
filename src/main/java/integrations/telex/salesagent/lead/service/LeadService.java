@@ -129,20 +129,20 @@ public class LeadService {
             });
 
             // Get all existing emails from the database
-            Set<String> existingEmails = leadRepository.findAll().stream()
+            Set<String> existingLeadEmails = leadRepository.findAll().stream()
                             .map(Lead::getEmail)
                                     .collect(Collectors.toSet());
 
             // Filter out leads with emails already in the database
-//            List<Lead> newLeads = leads.stream()
-//                    .filter(lead -> !existingEmails.contains(lead.getEmail()))
-//                    .toList();
+            List<Lead> newLeads = leads.stream()
+                    .filter(lead -> !existingLeadEmails.contains(lead.getEmail()))
+                    .toList();
 
             // Filter out leads with emails already linked to the user
-            List<Lead> newLeads = leads.stream()
-                    .filter(lead -> !existingEmails.contains(lead.getEmail()))
-                    .filter(lead -> !lead.getUserId().equals(userId))
-                    .toList();
+//            List<Lead> newLeads = leads.stream()
+//                    .filter(lead -> !existingEmails.contains(lead.getEmail()))
+//                    .filter(lead -> !lead.getUserId().equals(userId))
+//                    .toList();
 
             for (Lead lead: newLeads) {
                 telexClient.processTelexPayload(channelId, lead);
