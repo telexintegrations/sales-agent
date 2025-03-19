@@ -109,10 +109,10 @@ public class ChatService {
 
             String instruction = "Your search criteria have been saved. We will notify you when we find leads matching your criteria.";
             telexClient.sendInstruction(channelId, instruction);
-
-            channelResponses.remove(channelId);
-            callDomainSearchEndpoint(channelId);
+            return;
         }
+        channelResponses.remove(channelId);
+        callDomainSearchEndpoint(channelId);
     }
 
     private boolean isValidEmail(String email) {
