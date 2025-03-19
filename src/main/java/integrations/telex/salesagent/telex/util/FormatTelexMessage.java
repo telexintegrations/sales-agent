@@ -1,7 +1,9 @@
 package integrations.telex.salesagent.telex.util;
 
 import integrations.telex.salesagent.lead.entity.Lead;
+import org.springframework.stereotype.Component;
 
+@Component
 public class FormatTelexMessage {
     private static final String NEW_LEAD = """
             New lead has been found:

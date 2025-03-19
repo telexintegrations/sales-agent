@@ -23,9 +23,4 @@ public class AppConfig {
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
-
-    @Bean
-    public FormatTelexMessage messageFormatter() {
-        return new FormatTelexMessage();
-    }
 }
