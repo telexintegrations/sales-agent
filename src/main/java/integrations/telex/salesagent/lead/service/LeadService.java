@@ -148,7 +148,6 @@ public class LeadService {
 
             for (Lead lead: newLeads) {
                 telexClient.processTelexPayload(channelId, lead);
-                return;
             }
 
         } catch (IOException e) {

@@ -33,7 +33,7 @@ public class TelexClient {
     }
 
     public void processTelexPayload(String channelID, Lead lead) throws JsonProcessingException {
-        String message = formatTelexMessage.formatNewLeadMessage(lead);
+        String message = formatTelexMessage.formatNewLeadMessage(lead) + + "\n\nSales Agent Bot";
 
         TelexPayload telexPayload = new TelexPayload("New Lead Alert", "Sales Agent", "success", message);
 
