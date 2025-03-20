@@ -7,11 +7,10 @@ import integrations.telex.salesagent.config.AppConfig;
 import integrations.telex.salesagent.config.OkHttpConfig;
 import integrations.telex.salesagent.lead.dto.EmailFinderRequest;
 import integrations.telex.salesagent.lead.dto.LeadDTO;
-import integrations.telex.salesagent.lead.entity.Lead;
+import integrations.telex.salesagent.lead.model.Lead;
 import integrations.telex.salesagent.lead.repository.LeadRepository;
 import integrations.telex.salesagent.telex.service.TelexClient;
-import integrations.telex.salesagent.user.dto.request.SalesAgentPayloadDTO;
-import integrations.telex.salesagent.user.entity.User;
+import integrations.telex.salesagent.user.model.User;
 import integrations.telex.salesagent.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -89,16 +88,17 @@ public class LeadService {
     }
     public void domainSearch(String channelId) {
         try {
-            Optional<User> user = userRepository.findByChannelId(channelId);
+            Optional<User> userOptional = userRepository.findByChannelId(channelId);
 
-            if (user.isEmpty()) {
+            if (userOptional.isEmpty()) {
                 String message = "User not found. Please provide a valid user.";
                 telexClient.failedInstruction(channelId, message);
                 return;
             }
 
-            String domain = user.get().getLeadType();
-            String userId = user.get().getId();
+            User user = userOptional.get();
+            String domain = user.getLeadType();
+            String userId = user.getId();
 
             String key = okHttpConfig.hunterParams().getApikey();
             String baseUrl = okHttpConfig.hunterParams().getBaseUrl();
@@ -128,27 +128,22 @@ public class LeadService {
                 leads.add(lead);
             });
 
-            // Get all existing emails from the database
-            Set<String> existingEmails = leadRepository.findAll().stream()
-                            .map(Lead::getEmail)
-                                    .collect(Collectors.toSet());
+            List<Lead> existingLeads = leadRepository.findAll();
 
-            // Filter out leads with emails already in the database
-//            List<Lead> newLeads = leads.stream()
-//                    .filter(lead -> !existingEmails.contains(lead.getEmail()))
-//                    .toList();
+            Map<String, String> existingLeadsMap = existingLeads.stream()
+                    .collect(Collectors.toMap(Lead::getEmail, Lead::getUserId, (existing, replacement) -> existing));
 
-            // Filter out leads with emails already linked to the user
             List<Lead> newLeads = leads.stream()
-                    .filter(lead -> !existingEmails.contains(lead.getEmail()))
-                    .filter(lead -> !lead.getUserId().equals(userId))
+                    .filter(lead -> !existingLeadsMap.containsKey(lead.getEmail()) ||
+                            !existingLeadsMap.get(lead.getEmail()).equals(userId))
                     .toList();
+
+            leadRepository.saveAll(newLeads);
 
             for (Lead lead: newLeads) {
                 telexClient.processTelexPayload(channelId, lead);
             }
 
-            leadRepository.saveAll(newLeads);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

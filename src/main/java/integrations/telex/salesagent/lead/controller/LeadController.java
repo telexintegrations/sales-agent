@@ -2,7 +2,7 @@ package integrations.telex.salesagent.lead.controller;
 
 import integrations.telex.salesagent.lead.dto.EmailFinderRequest;
 import integrations.telex.salesagent.lead.dto.LeadDTO;
-import integrations.telex.salesagent.lead.entity.Lead;
+import integrations.telex.salesagent.lead.model.Lead;
 import integrations.telex.salesagent.lead.service.LeadService;
 import integrations.telex.salesagent.user.dto.request.SalesAgentPayloadDTO;
 import lombok.RequiredArgsConstructor;
