@@ -144,11 +144,13 @@ public class LeadService {
 //                    .filter(lead -> !lead.getUserId().equals(userId))
 //                    .toList();
 
+            leadRepository.saveAll(newLeads);
+
             for (Lead lead: newLeads) {
                 telexClient.processTelexPayload(channelId, lead);
+                return;
             }
 
-            leadRepository.saveAll(newLeads);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
