@@ -128,21 +128,17 @@ public class LeadService {
                 leads.add(lead);
             });
 
-            // Get all existing emails from the database
-            Set<String> existingLeadEmails = leadRepository.findAll().stream()
-                            .map(Lead::getEmail)
-                                    .collect(Collectors.toSet());
+            List<Lead> existingLeads = leadRepository.findAll();
+
+            // Create a map of existing emails and their associated user IDs
+            Map<String, String> existingLeadsMap = existingLeads.stream()
+                    .collect(Collectors.toMap(Lead::getEmail, Lead::getUserId, (existing, replacement) -> existing));
 
             // Filter out leads with emails already in the database
             List<Lead> newLeads = leads.stream()
-                    .filter(lead -> !existingLeadEmails.contains(lead.getEmail()))
-                    .toList();
-
-            // Filter out leads with emails already linked to the user
-//            List<Lead> newLeads = leads.stream()
-//                    .filter(lead -> !existingEmails.contains(lead.getEmail()))
-//                    .filter(lead -> !lead.getUserId().equals(userId))
-//                    .toList();
+                    .filter(lead -> !existingLeadsMap.containsKey(lead.getEmail()) ||
+                            !existingLeadsMap.get(lead.getEmail()).equals(userId)
+                                            .toList();
 
             leadRepository.saveAll(newLeads);
 
