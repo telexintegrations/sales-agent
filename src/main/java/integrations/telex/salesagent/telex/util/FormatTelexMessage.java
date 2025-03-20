@@ -1,6 +1,6 @@
 package integrations.telex.salesagent.telex.util;
 
-import integrations.telex.salesagent.lead.entity.Lead;
+import integrations.telex.salesagent.lead.model.Lead;
 import org.springframework.stereotype.Component;
 
 @Component

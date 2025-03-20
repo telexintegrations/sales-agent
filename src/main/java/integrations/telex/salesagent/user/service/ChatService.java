@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import integrations.telex.salesagent.lead.service.LeadService;
 import integrations.telex.salesagent.telex.service.TelexClient;
-import integrations.telex.salesagent.user.entity.User;
+import integrations.telex.salesagent.user.model.User;
 import integrations.telex.salesagent.user.repository.UserRepository;
 import integrations.telex.salesagent.user.utils.RequestFormatter;
 import lombok.RequiredArgsConstructor;
@@ -80,7 +80,7 @@ public class ChatService {
             }
             userResponses.add(email);
             String instruction = "Please provide the company you're looking for starting with the word Company" +
-                    "\n e.g. linkedin.";
+                    "\n e.g. company: linkedin.";
             telexClient.sendInstruction(channelId, instruction);
             return;
         }
