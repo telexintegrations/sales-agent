@@ -137,8 +137,8 @@ public class LeadService {
             // Filter out leads with emails already in the database
             List<Lead> newLeads = leads.stream()
                     .filter(lead -> !existingLeadsMap.containsKey(lead.getEmail()) ||
-                            !existingLeadsMap.get(lead.getEmail()).equals(userId)
-                                            .toList();
+                            !existingLeadsMap.get(lead.getEmail()).equals(userId))
+                            .toList();
 
             leadRepository.saveAll(newLeads);
 
