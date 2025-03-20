@@ -47,65 +47,72 @@ public class ChatService {
 
         List<String> userResponses = channelResponses.computeIfAbsent(channelId, k -> new ArrayList<>());
 
+        if ((userResponses.size() == 1 || userResponses.size() == 2 || userResponses.size() == 3) && message.equalsIgnoreCase("/start")) {
+            userResponses.clear();
+        }
+
         if (userResponses.isEmpty()) {
-            if (!message.contains("/start")) {
+            if (!message.equalsIgnoreCase("/start")) {
                 String instruction = "Invalid Command. Please type /start to begin the process.";
                 telexClient.failedInstruction(channelId, instruction);
                 return;
             }
             userResponses.add("/start");
-            String instruction = "Welcome! Please provide your business email address starting with Email." +
-                    "\n e.g. Email: test@example.com";
+            String instruction = "Welcome! Please provide your business email address." +
+                    "\n e.g. test@example.com";
             telexClient.sendInstruction(channelId, instruction);
             return;
         }
 
         if (userResponses.size() == 1) {
-            String extractedEmail = message.replace("Email: ", "");
-            if (!isValidEmail(message)) {
+            String email = message.trim();
+            if (!isValidEmail(email)) {
                 String instruction = "Invalid Email Address. Please provide a valid email address.\n" +
-                        "e.g. Email: test@example.com";
+                        "e.g. test@example.com";
                 telexClient.failedInstruction(channelId, instruction);
                 return;
             }
-            if (userRepository.findByEmail(extractedEmail).isPresent()) {
+            if (userRepository.findByEmail(email).isPresent()) {
                 String instruction = "Email already exists. Please provide a different email address.\n " +
-                        "e.g. Email: test@exampl,e.com";
+                        "e.g. test@example.com";
                 telexClient.failedInstruction(channelId, instruction);
                 return;
             }
-            userResponses.add(extractedEmail);
-            String instruction = "Please provide the company you're looking for starting with the word Company\n e.g." +
-                    " " +
-                    "Company: linkedin.";
+            userResponses.add(email);
+            String instruction = "Please provide the company you're looking for starting with the word Company" +
+                    "\n e.g. linkedin.";
             telexClient.sendInstruction(channelId, instruction);
             return;
         }
 
         if (userResponses.size() == 2) {
-            if (!message.startsWith("Company: ")) {
+            if (!message.startsWith("Company:".toLowerCase())) {
                 String instruction = "Please provide the company you're looking for starting with the word Company\n " +
-                        "e.g. Company: linkedin.";
+                        "e.g. Company: linkedin";
                 telexClient.failedInstruction(channelId, instruction);
                 return;
             }
-            String extractedCompany = message.replace("Company: ", "");
+            String extractedCompany = message.replace("Company:", "").trim();
             userResponses.add(extractedCompany);
             String instruction = "What type of lead are you looking for?\nEnter the domain name of the lead e.g. " +
-                    "Domain: linkedin.com";
+                    "linkedin.com";
             telexClient.sendInstruction(channelId, instruction);
             return;
         }
 
         if (userResponses.size() == 3) {
-            if (!message.contains("Domain: ")) {
-                String instruction = "Invalid Domain Name. Please provide a valid domain name.";
+            String domain = message.trim();
+            if (!isValidDomain(message)) {
+                String instruction = "Invalid Domain Name. Please provide a valid domain name. " +
+                        "\n e.g. linkedin.com";
                 telexClient.failedInstruction(channelId, instruction);
                 return;
             }
-            String extractedDomain = message.replace("Domain: ", "");
-            userResponses.add(extractedDomain);
+            userResponses.add(domain);
             saveUser(userResponses, channelId);
+
+            String instruction = "Your search criteria have been saved. We will notify you when we find leads matching your criteria.";
+            telexClient.sendInstruction(channelId, instruction);
 
             channelResponses.remove(channelId);
             callDomainSearchEndpoint(channelId);
@@ -117,17 +124,18 @@ public class ChatService {
         return Pattern.compile(emailRegex).matcher(email.replace("Email: ", "")).matches();
     }
 
-    private void saveUser(List<String> responses, String channelId) throws JsonProcessingException {
+    private boolean isValidDomain(String domain) {
+        String domainRegex = "^(?!-)[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
+        return Pattern.compile(domainRegex).matcher(domain).matches();
+    }
+
+    private void saveUser(List<String> responses, String channelId) {
         User user = new User();
         user.setEmail(responses.get(1));
         user.setCompanyName(responses.get(2));
         user.setLeadType(responses.get(3));
         user.setChannelId(channelId);
         userRepository.save(user);
-
-//        String instruction = "Your search criteria have been saved. We will notify you when we find leads matching your criteria.";
-//        telexClient.sendInstruction(channelId, instruction);
-//        return;
     }
 
     private void callDomainSearchEndpoint(String channelId) {
