@@ -51,12 +51,14 @@ public class ChatService {
             userResponses.clear();
         }
 
-        if (userResponses.isEmpty()) {
+        if (userResponses.isEmpty() && message.equalsIgnoreCase("/start")) {
+            /*
             if (!message.equalsIgnoreCase("/start")) {
                 String instruction = "Invalid Command. Please type /start to begin the process.";
                 telexClient.failedInstruction(channelId, instruction);
                 return;
             }
+             */
             userResponses.add("/start");
             String instruction = "Welcome! Please provide your business email address." +
                     "\n e.g. test@example.com";
@@ -65,6 +67,10 @@ public class ChatService {
         }
 
         if (userResponses.size() == 1) {
+            if (message.equalsIgnoreCase("/exit")) {
+                exitProcess(channelId);
+                return;
+            }
             String email = message.trim();
             if (!isValidEmail(email)) {
                 String instruction = "Invalid Email Address. Please provide a valid email address.\n" +
@@ -86,7 +92,11 @@ public class ChatService {
         }
 
         if (userResponses.size() == 2) {
-            if (!message.startsWith("Company:".toLowerCase())) {
+            if (message.equalsIgnoreCase("/exit")) {
+                exitProcess(channelId);
+                return;
+            }
+            if (!message.startsWith("Company:")) {
                 String instruction = "Please provide the company you're looking for starting with the word Company\n " +
                         "e.g. Company: linkedin";
                 telexClient.failedInstruction(channelId, instruction);
@@ -101,6 +111,10 @@ public class ChatService {
         }
 
         if (userResponses.size() == 3) {
+            if (message.equalsIgnoreCase("/exit")) {
+                exitProcess(channelId);
+                return;
+            }
             String domain = message.trim();
             if (!isValidDomain(message)) {
                 String instruction = "Invalid Domain Name. Please provide a valid domain name. " +
@@ -140,5 +154,11 @@ public class ChatService {
 
     private void callDomainSearchEndpoint(String channelId) {
         leadService.domainSearch(channelId);
+    }
+
+    private void exitProcess(String channelId) throws JsonProcessingException {
+        channelResponses.remove(channelId);
+        String instruction = "You have exited the process. Type /start to begin chatting with the agent again.";
+        telexClient.sendInstruction(channelId, instruction);
     }
 }
