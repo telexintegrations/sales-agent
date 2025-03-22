@@ -46,7 +46,7 @@ The chat interaction between business owners and the sales agent takes place in 
     - At any point during the interaction, users can exit the process by sending the `/exit` command.
     - The system acknowledges the exit request and stops the interaction.
 
-       ![Step 2: Exiting the Process](src/main/resources/static/sales-agent/3.png)
+       ![Step 2: Exiting the Process](src/main/resources/static/sales-agent/6.png)
 
 3. **Email Validation**:
     - The system validates the provided email address using a regex pattern.
