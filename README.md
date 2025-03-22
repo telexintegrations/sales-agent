@@ -42,35 +42,41 @@ The chat interaction between business owners and the sales agent takes place in 
 
        ![Step 1: Starting the Process](src/main/resources/static/sales-agent/1.png)
 
-2. **Email Validation**:
+2. **Exiting the Process**:
+    - At any point during the interaction, users can exit the process by sending the `/exit` command.
+    - The system acknowledges the exit request and stops the interaction.
+
+       ![Step 2: Exiting the Process](src/main/resources/static/sales-agent/3.png)
+
+3. **Email Validation**:
     - The system validates the provided email address using a regex pattern.
       ![Step 2: Accepted Email](src/main/resources/static/sales-agent/3.png)
     - If the email is invalid or already exists in the system, an appropriate message is displayed.
    
       ![Step 3: Email Validation](src/main/resources/static/sales-agent/2.png)
-3. **Company Information**:
+4. **Company Information**:
     - Users are prompted to specify the company they are targeting by starting their response with `Company:` (e.g., `Company: linkedin`).
     - Input is validated to ensure it follows the required format.
 
       ![Step 3: Company Information](src/main/resources/static/sales-agent/4.png)
 
-4. **Lead Type**:
+5. **Lead Type**:
     - Users specify the type of lead they need by providing the lead's domain name (e.g., `linkedin.com`).
 
       ![Step 4: Lead Type](src/main/resources/static/sales-agent/5.png)
 
-5. **Automated Instructions**:
+6. **Automated Instructions**:
     - Clear and friendly instructions are sent at every step of the process.
     - The system communicates with users via the configured Telex webhook URL.
 
-6. **Persisting User Data**:
+7. **Persisting User Data**:
     - Once all required inputs are collected, the user's information (email, company name, and lead type) is saved in the database for further processing.
 
    
-7. **Domain Search Integration**:
+8. **Domain Search Integration**:
     - The service triggers the `domain-search` endpoint of the lead generation API to fetch leads matching the specified criteria.
 
-8. **Success Notification**: 
+9. **Success Notification**: 
     - Upon successful lead retrieval, the system sends a notification to the user via the Telex channel with all the leads found.
 
       ![Step 8: Leads Found](src/main/resources/static/sales-agent/new-lead-1.png)
