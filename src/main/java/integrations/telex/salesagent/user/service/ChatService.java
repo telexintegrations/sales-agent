@@ -48,6 +48,7 @@ public class ChatService {
 
         List<String> userResponses = channelResponses.computeIfAbsent(channelId, k -> new ArrayList<>());
 
+
         if (userResponses.isEmpty()) {
             if (isSaleAgentCalled(message) || message.contains("/start")) {
                 userResponses.add("/start");
@@ -58,13 +59,43 @@ public class ChatService {
                 log.info(isSaleAgentCalled(message).toString());
                 return;
             }
+
+        if ((userResponses.size() == 1 || userResponses.size() == 2 || userResponses.size() == 3) && message.equalsIgnoreCase("/start")) {
+
+            userResponses.clear();
+        }
+
+        if (userResponses.isEmpty() && message.equalsIgnoreCase("/start")) {
+            /*
+            if (!message.equalsIgnoreCase("/start")) {
+                String instruction = "Invalid Command. Please type /start to begin the process.";
+                telexClient.failedInstruction(channelId, instruction);
+                return;
+            }
+             */
+            userResponses.add("/start");
+            String instruction = "Welcome! Please provide your business email address." +
+                    "\n e.g. test@example.com";
+            telexClient.sendInstruction(channelId, instruction);
+
             return;
 
         }
 
         if (userResponses.size() == 1) {
+
             if (!isValidEmail(message)) {
                 String instruction = "Invalid Email Address. Please provide a valid email address";
+
+            if (message.equalsIgnoreCase("/exit")) {
+                exitProcess(channelId);
+                return;
+            }
+            String email = message.trim();
+            if (!isValidEmail(email)) {
+                String instruction = "Invalid Email Address. Please provide a valid email address.\n" +
+                        "e.g. test@example.com";
+
                 telexClient.failedInstruction(channelId, instruction);
                 return;
             }
@@ -81,7 +112,15 @@ public class ChatService {
         }
 
         if (userResponses.size() == 2) {
+
             if (!isValidCompany(message)) {
+
+            if (message.equalsIgnoreCase("/exit")) {
+                exitProcess(channelId);
+                return;
+            }
+            if (!message.startsWith("Company:")) {
+
                 String instruction = "Please provide the company you're looking for starting with the word Company\n " +
                         "e.g. linkedin";
                 telexClient.failedInstruction(channelId, instruction);
@@ -94,6 +133,13 @@ public class ChatService {
         }
 
         if (userResponses.size() == 3) {
+
+            if (message.equalsIgnoreCase("/exit")) {
+                exitProcess(channelId);
+                return;
+            }
+            String domain = message.trim();
+
             if (!isValidDomain(message)) {
                 String instruction = "Invalid Domain Name. Please provide a valid domain name.";
                 telexClient.failedInstruction(channelId, instruction);
@@ -163,6 +209,7 @@ public class ChatService {
         leadService.domainSearch(channelId);
     }
 
+
     private Boolean isSaleAgentCalled(String message){
         String request = String.format("Carefully analyze the following text and determine whether it relates to lead" +
                 " generation by a sales agent. Look for explicit indicators such as references to prospecting, identifying potential customers, outreach efforts, nurturing leads, sales pitches," +
@@ -173,4 +220,10 @@ public class ChatService {
         return response.contains("true");
     }
 
+
+    private void exitProcess(String channelId) throws JsonProcessingException {
+        channelResponses.remove(channelId);
+        String instruction = "You have exited the process. Type /start to begin chatting with the agent again.";
+        telexClient.sendInstruction(channelId, instruction);
+    }
 }
