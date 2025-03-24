@@ -222,7 +222,7 @@ public class LeadService {
             Response response = okHttpClient.newCall(request).execute();
             byte[] responseBody = response.body().bytes();
             JsonNode jsonNode = objectMapper.readTree(responseBody);
-            return ResponseEntity.ok(jsonNode.get("data").get("calls"));
+            return ResponseEntity.ok(jsonNode.get("data"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
