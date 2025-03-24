@@ -54,6 +54,8 @@ public class LeadService {
 
     private final TelexClient telexClient;
 
+    private List<Lead> defaultLeads;
+
     /**
      * Retrieves all leads with pagination.
      *
@@ -86,14 +88,14 @@ public class LeadService {
             return ResponseEntity.internalServerError().body(error.getMessage());
         }
     }
-    public void domainSearch(String channelId) {
+    public List<Lead> domainSearch(String channelId) {
         try {
             Optional<User> userOptional = userRepository.findByChannelId(channelId);
 
             if (userOptional.isEmpty()) {
                 String message = "User not found. Please provide a valid user.";
                 telexClient.failedInstruction(channelId, message);
-                return;
+                return null;
             }
 
             User user = userOptional.get();
@@ -140,10 +142,10 @@ public class LeadService {
 
             leadRepository.saveAll(newLeads);
 
-            for (Lead lead: newLeads) {
+            for (Lead lead : newLeads) {
                 telexClient.processTelexPayload(channelId, lead);
             }
-
+            return newLeads;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
