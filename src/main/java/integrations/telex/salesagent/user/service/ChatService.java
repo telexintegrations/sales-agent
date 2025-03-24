@@ -56,13 +56,14 @@ public class ChatService {
     if (userResponses.isEmpty()) {
         if (isSaleAgentCalled(message) || message.contains("/start")) {
             userResponses.add("/start");
-            String instruction = "Welcome! Please provide your business email address starting with Email." +
+            String instruction = "Welcome! Please provide your business email address starting with Email. " +
                     "\n e.g. test@example.com";
             telexClient.sendInstruction(channelId, instruction);
         } else {
             log.info(isSaleAgentCalled(message).toString());
-            return;
         }
+        return;
+    }
 
         /*
         if (userResponses.isEmpty() && message.equalsIgnoreCase("/start")) {
@@ -155,7 +156,6 @@ public class ChatService {
                 callDomainSearchEndpoint(channelId);
             }
         }
-    }
 
 
     private boolean isValidEmail(String email) {
