@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -114,27 +113,26 @@ public class ChatService {
         }
 
         if (userResponses.size() == 2) {
-            if (!message.startsWith("Company:".toLowerCase())) {
+
+            if (!isValidCompany(message)) {
+
                 if (message.equalsIgnoreCase("/exit")) {
                     exitProcess(channelId);
                     return;
                 }
-                if (!message.startsWith("Company:")) {
+
                     String instruction = "Please provide the company you're looking for starting with the word Company\n " +
-                            "e.g. Company: linkedin";
+                            "e.g. linkedin";
                     telexClient.failedInstruction(channelId, instruction);
                     return;
-                }
-                String extractedCompany = message.replace("Company:", "").trim();
-                userResponses.add(extractedCompany);
-                String instruction = "What type of lead are you looking for?\nEnter the domain name of the lead e.g. " +
-                        "linkedin.com";
-                telexClient.sendInstruction(channelId, instruction);
-                return;
             }
-        }
+            userResponses.add(message);
+            String instruction = "What type of lead are you looking for?\nEnter the domain name of the lead e.g. linkedin.com";
+            telexClient.sendInstruction(channelId, instruction);
+            return;
+            }
 
-        if (userResponses.size() == 3) {
+            if (userResponses.size() == 3) {
 
                 if (message.equalsIgnoreCase("/exit")) {
                     exitProcess(channelId);
@@ -157,7 +155,7 @@ public class ChatService {
                 channelResponses.remove(channelId);
                 callDomainSearchEndpoint(channelId);
             }
-    }
+        }
 
 
     private boolean isValidEmail(String email) {
@@ -198,7 +196,6 @@ public class ChatService {
         String response = chatModel.call(request).toLowerCase();
         return response.contains("true");
     }
-
 
     private void saveUser(List<String> responses, String channelId) {
         User user = new User();
