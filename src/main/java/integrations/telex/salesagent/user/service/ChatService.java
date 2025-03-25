@@ -131,7 +131,7 @@ public class ChatService {
             saveUser(userResponses, channelId);
 
 
-            coldEmailService.getColdEmailParams(channelId, message);
+            coldEmailParams(channelId, message);
 
 
             String instruction = "Your search criteria have been saved. We will notify you when we find leads matching your criteria.";
@@ -198,6 +198,10 @@ public class ChatService {
 
     private void callDomainSearchEndpoint(String channelId) {
         leadService.domainSearch(channelId);
+    }
+
+    private void coldEmailParams(String channelId, String message) throws JsonProcessingException {
+        coldEmailService.getColdEmailParams(channelId, message);
     }
 
 
