@@ -35,7 +35,7 @@ public class ChatService {
     private final Map<String, List<String>> channelResponses = new ConcurrentHashMap<>();
 
     public void processMessage(String payload) throws JsonProcessingException {
-        List<Lead> leads = new ArrayList<>();
+        //List<Lead> leads = new ArrayList<>();
         JsonNode jsonNode = objectMapper.readTree(payload);
         String htmlMessage = jsonNode.get("message").asText();
         String message = requestFormatter.stripHtml(htmlMessage);
@@ -54,7 +54,6 @@ public class ChatService {
         List<String> userResponses = channelResponses.computeIfAbsent(channelId, k -> new ArrayList<>());
 
         if ((userResponses.size() == 1 || userResponses.size() == 2 || userResponses.size() == 3) && message.equalsIgnoreCase("/start")) {
-
             userResponses.clear();
         }
 
@@ -69,26 +68,6 @@ public class ChatService {
             }
             return;
         }
-
-        /*
-        if (userResponses.isEmpty() && message.equalsIgnoreCase("/start")) {
-
-        if (!message.equalsIgnoreCase("/start")) {
-            String instruction = "Invalid Command. Please type /start to begin the process.";
-            telexClient.failedInstruction(channelId, instruction);
-            return;
-        }
-
-            userResponses.add("/start");
-            String instruction = "Welcome! Please provide your business email address." +
-                    "\n e.g. test@example.com";
-            telexClient.sendInstruction(channelId, instruction);
-
-            return;
-
-        }
-
-         */
 
         if (userResponses.size() == 1) {
 
@@ -105,41 +84,37 @@ public class ChatService {
                 telexClient.failedInstruction(channelId, instruction);
                 return;
             }
-            if (userRepository.findByEmail(message).isPresent()) {
+            if (userRepository.findByEmail(email).isPresent()) {
                 String instruction = "Email already exists. Please provide a different email address.";
                 telexClient.failedInstruction(channelId, instruction);
                 return;
             }
-            userResponses.add(message);
-            String instruction = "Please provide the company you're looking for starting with the word Company " +
+            userResponses.add(email);
+            String instruction = "Please provide the company you're looking for leads from." +
                     "e.g. linkedin";
             telexClient.sendInstruction(channelId, instruction);
             return;
         }
 
         if (userResponses.size() == 2) {
-            if (!message.startsWith("Company:".toLowerCase())) {
-                if (message.equalsIgnoreCase("/exit")) {
-                    exitProcess(channelId);
-                    return;
-                }
-                if (!message.startsWith("Company:")) {
-                    String instruction = "Please provide the company you're looking for starting with the word Company\n " +
-                            "e.g. Company: linkedin";
-                    telexClient.failedInstruction(channelId, instruction);
-                    return;
-                }
-                String extractedCompany = message.replace("Company:", "").trim();
-                userResponses.add(extractedCompany);
-                String instruction = "What are you looking for?\n" +
-                        "Enter the domain you would like to search for leads e.g. linkedin.com";
-                telexClient.sendInstruction(channelId, instruction);
+            if (message.equalsIgnoreCase("/exit")) {
+                exitProcess(channelId);
                 return;
             }
+            if (message.isEmpty() || !isValidCompany(message)) {
+                String instruction = "Please provide the company you're looking for leads from. e.g. linkedin";
+                telexClient.failedInstruction(channelId, instruction);
+                return;
+            }
+            String extractedCompany = message.trim();
+            userResponses.add(extractedCompany);
+            String instruction = "What are you looking for?\n" +
+                    "Enter the domain you would like to search for leads e.g. linkedin.com";
+            telexClient.sendInstruction(channelId, instruction);
+            return;
         }
 
         if (userResponses.size() == 3) {
-
             if (message.equalsIgnoreCase("/exit")) {
                 exitProcess(channelId);
                 return;
@@ -159,110 +134,11 @@ public class ChatService {
             telexClient.sendInstruction(channelId, instruction);
 
             channelResponses.remove(channelId);
+            callDomainSearchEndpoint(channelId, message);
 
-            leads.addAll(callDomainSearchEndpoint(channelId));
+            //leads.addAll(callDomainSearchEndpoint(channelId));
 
         }
-
-        if(leads.isEmpty()) {
-            exitProcess(channelId);
-            return;
-        }else {
-            ColdEmailParams coldEmailParams = getColdEmailParams(channelId,message);
-            generateColdEmails(coldEmailParams,leads);
-        }
-    }
-
-    private ColdEmailParams getColdEmailParams(String channelId,String message) throws JsonProcessingException {
-        List<String> userResponses = channelResponses.computeIfAbsent(channelId, k -> new ArrayList<>());
-
-        if (userResponses.isEmpty()) {
-            String instruction = "Would you like to draft cold emails for this leads? \n" +
-                    "Yes or no";
-            telexClient.sendInstruction(channelId, instruction);
-
-            if (message.equalsIgnoreCase("no")) {
-                exitProcess(channelId);
-                return null;
-            } else if (message.equalsIgnoreCase("yes")) {
-                userResponses.add("yes");
-                telexClient.sendInstruction(channelId, "Enter your name for email personalization");
-                return null;
-            }
-            return null;
-        }
-
-        if (userResponses.size() == 1){
-            if (message.equalsIgnoreCase("/exit")) {
-                exitProcess(channelId);
-                return null;
-            }
-            if (message.isEmpty()) {
-                String instruction = "Please provide your name for email personalization";
-                telexClient.failedInstruction(channelId, instruction);
-                return null;
-            }
-            userResponses.add(message.trim());
-            String instruction = "Enter your product name for email personalization ";
-            telexClient.sendInstruction(channelId, instruction);
-            return null;
-        }
-
-        if (userResponses.size() == 2){
-            if (!message.startsWith("Company:".toLowerCase())) {
-                if (message.equalsIgnoreCase("/exit")) {
-                    exitProcess(channelId);
-                    return null;
-                }
-                if (!message.startsWith("Company:")) {
-                    String instruction = "Please provide your company starting with the word Company\n " +
-                            "e.g. Company: linkedin";
-                    telexClient.failedInstruction(channelId, instruction);
-                    return null;
-                }
-                String extractedCompany = message.replace("Company:", "").trim();
-                userResponses.add(extractedCompany);
-                String instruction = "Enter your jobTitle for email personalization ";
-                telexClient.sendInstruction(channelId, instruction);
-                return null;
-            }
-        }
-
-        if (userResponses.size() == 3){
-            if (message.equalsIgnoreCase("/exit")) {
-                exitProcess(channelId);
-                return null;
-            }
-            if (message.isEmpty()) {
-                String instruction = "Please provide your product name for email personalization";
-                telexClient.failedInstruction(channelId, instruction);
-                return null;
-            }
-            userResponses.add(message.trim());
-            String instruction = "Enter your job Title for email personalization ";
-            telexClient.sendInstruction(channelId, instruction);
-            return null;
-        }
-
-        if (userResponses.size() == 4){
-            if (message.equalsIgnoreCase("/exit")) {
-                exitProcess(channelId);
-                return null;
-            }
-            if (message.isEmpty()) {
-                String instruction = "Please provide your job title for email personalization";
-                telexClient.failedInstruction(channelId, instruction);
-                return null;
-            }
-            userResponses.add(message.trim());
-        }
-
-        return ColdEmailParams.builder()
-                .userName(userResponses.get(1))
-                .userCompany(userResponses.get(2))
-                .product(userResponses.get(3))
-                .jobTitle(userResponses.get(4))
-                .build();
     }
 
     private boolean isValidEmail(String email) {
@@ -314,44 +190,13 @@ public class ChatService {
         userRepository.save(user);
     }
 
-    private List<Lead> callDomainSearchEndpoint(String channelId) {
-        return leadService.domainSearch(channelId);
+//    private List<Lead> callDomainSearchEndpoint(String channelId) {
+//        return leadService.domainSearch(channelId);
+//    }
+
+    private void callDomainSearchEndpoint(String channelId, String message) {
+        leadService.domainSearch(channelId, message);
     }
-
-    public void generateColdEmails(ColdEmailParams coldEmailParams,List<Lead> leads){
-        List<String> emails = new ArrayList<>();
-        for (Lead lead: leads){
-            String prompt =
-                    "A lead named " + lead.getName() +
-                        " with email " + lead.getEmail() +
-                        ", who works at " + lead.getCompany() +
-                        ", in the " + lead.getIndustry() + " industry. " +
-                        "Generate a concise and personalized cold email to this person. " +
-                        "My name is " + coldEmailParams.getUserName()+ " from "+ coldEmailParams.getUserCompany()+
-                        " as the/a " + coldEmailParams.getJobTitle() + "."+
-                        "Focus on highlighting the value of our product/service ("+ coldEmailParams.getProduct()+") by addressing" +
-                        " potential challenges they may face in their industry, and include an engaging" +
-                        " call to action to encourage a response.";
-            emails.add(chatModel.call(prompt));
-        }
-
-        if (emails.isEmpty()) {
-            log.error("error here");
-        }
-        else{
-            //send Cold Emails to channel
-            for (String email:
-                 emails) {
-                try {
-                    telexClient.sendInstruction(coldEmailParams.getChannelId(), email);
-                    return;
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-    }
-
 
 
     private Boolean isSaleAgentCalled(String message){
