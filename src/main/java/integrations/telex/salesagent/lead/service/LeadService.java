@@ -3,7 +3,6 @@ package integrations.telex.salesagent.lead.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import integrations.telex.salesagent.config.AppConfig;
 import integrations.telex.salesagent.config.OkHttpConfig;
 import integrations.telex.salesagent.lead.dto.EmailFinderRequest;
 import integrations.telex.salesagent.lead.dto.LeadDTO;
@@ -50,9 +49,8 @@ public class LeadService {
 
     private final UserRepository userRepository;
 
-    private final AppConfig appConfig;
-
     private final TelexClient telexClient;
+    private final LeadResearchService leadResearchService;
 
     private List<Lead> defaultLeads;
 
@@ -143,6 +141,7 @@ public class LeadService {
             leadRepository.saveAll(newLeads);
 
             for (Lead lead : newLeads) {
+                leadResearchService.fetchLeadReport(lead);
                 telexClient.processTelexPayload(channelId, lead);
             }
             return newLeads;
@@ -150,7 +149,6 @@ public class LeadService {
             throw new RuntimeException(e);
         }
     }
-
     @Transactional
     public ResponseEntity<?> emailFinder(EmailFinderRequest request) {
         try {
