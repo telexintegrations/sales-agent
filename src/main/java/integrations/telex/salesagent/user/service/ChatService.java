@@ -136,13 +136,15 @@ public class ChatService {
 
             String instruction = "Your search criteria have been saved. We will notify you when we find leads matching your criteria.";
             telexClient.sendInstruction(channelId, instruction);
+
+            instruction = "Would you like to draft cold emails for this leads? \n" +
+                    "Yes or no";
+
+            telexClient.sendInstruction(channelId, instruction);
+            return;
         }
 
         if (userResponses.size() == 4) {
-            String instruction = "Would you like to draft cold emails for this leads? \n" +
-                    "Yes or no";
-            telexClient.sendInstruction(channelId, instruction);
-
             if (message.equalsIgnoreCase("no")) {
                 exitProcess(channelId);
                 return;
@@ -171,23 +173,26 @@ public class ChatService {
         }
 
         if (userResponses.size() == 6){
-            if (!message.startsWith("Company:")) {
-                if (message.equalsIgnoreCase("/exit")) {
-                    exitProcess(channelId);
-                    return;
-                }
-                if (!message.startsWith("Company:")) {
-                    String instruction = "Please provide your company starting with the word Company\n " +
-                            "e.g. Company: linkedin";
-                    telexClient.failedInstruction(channelId, instruction);
-                    return;
-                }
-                String extractedCompany = message.replace("Company:", "").trim();
-                userResponses.add(extractedCompany);
-                String instruction = "Enter your jobTitle for email personalization ";
-                telexClient.sendInstruction(channelId, instruction);
+            if (message.equalsIgnoreCase("/exit")) {
+                exitProcess(channelId);
                 return;
             }
+            if (message.isEmpty()) {
+                String instruction = "Enter your product name for email personalization ";
+                telexClient.failedInstruction(channelId, instruction);
+                return;
+            }
+//            if (!message.startsWith("Company:")) {
+//                String instruction = "Please provide your company starting with the word Company\n " +
+//                        "e.g. Company: linkedin";
+//                telexClient.failedInstruction(channelId, instruction);
+//                return;
+//            }
+//            String extractedCompany = message.replace("Company:", "").trim();
+            userResponses.add(message);
+            String instruction = "Enter your jobTitle for email personalization ";
+            telexClient.sendInstruction(channelId, instruction);
+            return;
         }
 
         if (userResponses.size() == 7){
@@ -203,23 +208,23 @@ public class ChatService {
             userResponses.add(message.trim());
             String instruction = "Your responses have been saved to generate emails for your leads.";
             telexClient.sendInstruction(channelId, instruction);
+
+            Optional<User> userOptional = userRepository.findByChannelId(channelId);
+
+            if (userOptional.isEmpty()) {
+                String response = "User not found. Please provide a valid user.";
+                telexClient.failedInstruction(channelId, response);
+                return;
+            }
+
+            User user = userOptional.get();
+            String userId = user.getId();
+
+            saveColdEmailResponses(userResponses, userId, channelId);
+
+            channelResponses.remove(channelId);
+            callDomainSearchEndpoint(channelId);
         }
-
-        Optional<User> userOptional = userRepository.findByChannelId(channelId);
-
-        if (userOptional.isEmpty()) {
-            String response = "User not found. Please provide a valid user.";
-            telexClient.failedInstruction(channelId, response);
-            return;
-        }
-
-        User user = userOptional.get();
-        String userId = user.getId();
-
-        saveColdEmailResponses(userResponses, userId, channelId);
-
-        channelResponses.remove(channelId);
-        callDomainSearchEndpoint(channelId);
     }
 
     private boolean isValidEmail(String email) {
