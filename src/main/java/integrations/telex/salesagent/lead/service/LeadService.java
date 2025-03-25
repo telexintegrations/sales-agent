@@ -9,8 +9,10 @@ import integrations.telex.salesagent.lead.dto.LeadDTO;
 import integrations.telex.salesagent.lead.model.Lead;
 import integrations.telex.salesagent.lead.repository.LeadRepository;
 import integrations.telex.salesagent.telex.service.TelexClient;
+import integrations.telex.salesagent.user.dto.request.ColdEmailParams;
 import integrations.telex.salesagent.user.model.User;
 import integrations.telex.salesagent.user.repository.UserRepository;
+import integrations.telex.salesagent.user.service.ColdEmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
@@ -27,6 +29,7 @@ import org.springframework.web.client.RestClient;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -51,6 +54,7 @@ public class LeadService {
 
     private final TelexClient telexClient;
     private final LeadResearchService leadResearchService;
+    private final ColdEmailService coldEmailService;
 
     private List<Lead> defaultLeads;
 
@@ -86,14 +90,14 @@ public class LeadService {
             return ResponseEntity.internalServerError().body(error.getMessage());
         }
     }
-    public List<Lead> domainSearch(String channelId) {
+    public void domainSearch(String channelId, String message) {
         try {
             Optional<User> userOptional = userRepository.findByChannelId(channelId);
 
             if (userOptional.isEmpty()) {
-                String message = "User not found. Please provide a valid user.";
-                telexClient.failedInstruction(channelId, message);
-                return null;
+                String response = "User not found. Please provide a valid user.";
+                telexClient.failedInstruction(channelId, response);
+                return;
             }
 
             User user = userOptional.get();
@@ -138,13 +142,24 @@ public class LeadService {
                             !existingLeadsMap.get(lead.getEmail()).equals(userId))
                     .toList();
 
+//            if(newLeads.isEmpty()) {
+//                exitProcess(channelId);
+//                return;
+//            }else {
+//                ColdEmailParams coldEmailParams = coldEmailService.getColdEmailParams(channelId,message);
+//                coldEmailService.generateColdEmails(coldEmailParams,leads);
+//            }
+
+            ColdEmailParams coldEmailParams = coldEmailService.getColdEmailParams(channelId,message);
+
+
             leadRepository.saveAll(newLeads);
 
             for (Lead lead : newLeads) {
-                leadResearchService.fetchLeadReport(lead);
                 telexClient.processTelexPayload(channelId, lead);
+                leadResearchService.fetchLeadReport(lead);
+                coldEmailService.generateColdEmails(coldEmailParams,lead);
             }
-            return newLeads;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

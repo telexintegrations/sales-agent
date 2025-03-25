@@ -1,0 +1,419 @@
+{
+  "kind": "customsearch#search",
+  "url": {
+    "type": "application/json",
+    "template": "https://www.googleapis.com/customsearch/v1?q={searchTerms}&num={count?}&start={startIndex?}&lr={language?}&safe={safe?}&cx={cx?}&sort={sort?}&filter={filter?}&gl={gl?}&cr={cr?}&googlehost={googleHost?}&c2coff={disableCnTwTranslation?}&hq={hq?}&hl={hl?}&siteSearch={siteSearch?}&siteSearchFilter={siteSearchFilter?}&exactTerms={exactTerms?}&excludeTerms={excludeTerms?}&linkSite={linkSite?}&orTerms={orTerms?}&dateRestrict={dateRestrict?}&lowRange={lowRange?}&highRange={highRange?}&searchType={searchType}&fileType={fileType?}&rights={rights?}&imgSize={imgSize?}&imgType={imgType?}&imgColorType={imgColorType?}&imgDominantColor={imgDominantColor?}&alt=json"
+  },
+  "queries": {
+    "request": [
+      {
+        "title": "Google Custom Search - Susanna Dansie Stripe",
+        "totalResults": "1710",
+        "searchTerms": "Susanna Dansie Stripe",
+        "count": 10,
+        "startIndex": 1,
+        "inputEncoding": "utf8",
+        "outputEncoding": "utf8",
+        "safe": "off",
+        "cx": "813ddf05de05c4cfa"
+      }
+    ],
+    "nextPage": [
+      {
+        "title": "Google Custom Search - Susanna Dansie Stripe",
+        "totalResults": "1710",
+        "searchTerms": "Susanna Dansie Stripe",
+        "count": 10,
+        "startIndex": 11,
+        "inputEncoding": "utf8",
+        "outputEncoding": "utf8",
+        "safe": "off",
+        "cx": "813ddf05de05c4cfa"
+      }
+    ]
+  },
+  "context": {
+    "title": "Telex Lead Research"
+  },
+  "searchInformation": {
+    "searchTime": 0.401467,
+    "formattedSearchTime": "0.40",
+    "totalResults": "1710",
+    "formattedTotalResults": "1,710"
+  },
+  "items": [
+    {
+      "kind": "customsearch#result",
+      "title": "Susanna Dansie - Stripe | LinkedIn",
+      "htmlTitle": "Susanna Dansie - Stripe | LinkedIn",
+      "link": "https://uk.linkedin.com/in/susanna-dansie-814a96104",
+      "displayLink": "uk.linkedin.com",
+      "snippet": "Experience: Stripe · Education: The University of Edinburgh · Location: United Kingdom · 500+ connections on LinkedIn. View Susanna Dansie's profile on ...",
+      "htmlSnippet": "Experience: Stripe · Education: The University of Edinburgh · Location: United Kingdom · 500+ connections on LinkedIn. View Susanna Dansie's profile on ...",
+      "formattedUrl": "https://uk.linkedin.com/in/susanna-dansie-814a96104",
+      "htmlFormattedUrl": "https://uk.linkedin.com/in/susanna-dansie-814a96104",
+      "pagemap": {
+        "cse_thumbnail": [
+          {
+            "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2fbxpa157CLISkxxg8y5T91uz_Ce8JOwwURrtdk2fPzMnkfFquJK3&s",
+            "width": "96",
+            "height": "96"
+          }
+        ],
+        "metatags": [
+          {
+            "og:image": "https://static.licdn.com/scds/common/u/images/email/artdeco/logos/96/linkedin-bug-color.png",
+            "twitter:card": "summary",
+            "linkedin:pagetag": "openToProvider",
+            "platform-worker": "https://static.licdn.com/aero-v1/sc/h/7nirg34a8ey4y2l4rw7xgwxx4",
+            "al:android:package": "com.linkedin.android",
+            "bingbot": "nocache",
+            "locale": "en_US",
+            "al:ios:url": "https://uk.linkedin.com/in/susanna-dansie-814a96104",
+            "og:description": "Experience: Stripe · Education: The University of Edinburgh · Location: United Kingdom · 500+ connections on LinkedIn. View Susanna Dansie’s profile on LinkedIn, a professional community of 1 billion members.",
+            "al:ios:app_store_id": "288429040",
+            "platform": "https://static.licdn.com/aero-v1/sc/h/exkw4l4akgsym3om6tnupboq6",
+            "twitter:image": "https://media.licdn.com/dms/image/v2/C5603AQFata6vYlOdkA/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1557755144154?e=2147483647&v=beta&t=lOOSqf_6yzL7gAhtEdbnFeVnlbGmt9y7CyeXdXsYk7o",
+            "profile:last_name": "Dansie",
+            "twitter:site": "@Linkedin",
+            "litmsprofilename": "public-profile-frontend",
+            "profile:first_name": "Susanna",
+            "og:type": "profile",
+            "twitter:title": "Susanna Dansie - Stripe | LinkedIn",
+            "al:ios:app_name": "LinkedIn",
+            "og:title": "Susanna Dansie - Stripe | LinkedIn",
+            "pagekey": "public_profile_v3_mobile",
+            "al:android:url": "https://uk.linkedin.com/in/susanna-dansie-814a96104",
+            "viewport": "width=device-width, initial-scale=1.0",
+            "twitter:description": "Experience: Stripe · Education: The University of Edinburgh · Location: United Kingdom · 500+ connections on LinkedIn. View Susanna Dansie’s profile on LinkedIn, a professional community of 1 billion members.",
+            "ubba": "https://static.licdn.com/aero-v1/sc/h/dlxevueaszn1k5tiemxu7kmqy",
+            "og:url": "https://uk.linkedin.com/in/susanna-dansie-814a96104",
+            "al:android:app_name": "LinkedIn"
+          }
+        ],
+        "cse_image": [
+          {
+            "src": "https://static.licdn.com/scds/common/u/images/email/artdeco/logos/96/linkedin-bug-color.png"
+          }
+        ],
+        "Person": [
+          {}
+        ]
+      }
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "Rafael Suguihara on LinkedIn: \"We dreamed alone, but together, we ...",
+      "htmlTitle": "Rafael Suguihara on LinkedIn: \"We dreamed alone, but together, we ...",
+      "link": "https://www.linkedin.com/posts/rsuguihara_we-dreamed-alone-but-together-we-believed-activity-7272238861701840896-MdE2",
+      "displayLink": "www.linkedin.com",
+      "snippet": "Dec 10, 2024 ... Susanna Dansie. Go To Market Partnerships at Stripe ... Susan Wenzel. Member at AI Accelerator Institute | Empowering passionate ...",
+      "htmlSnippet": "Dec 10, 2024 ... Susanna Dansie. Go To Market Partnerships at Stripe ... Susan Wenzel. Member at AI Accelerator Institute | Empowering passionate ...",
+      "formattedUrl": "https://www.linkedin.com/.../rsuguihara_we-dreamed-alone-but-together-w...",
+      "htmlFormattedUrl": "https://www.linkedin.com/.../rsuguihara_we-dreamed-alone-but-together-w...",
+      "pagemap": {
+        "cse_thumbnail": [
+          {
+            "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1vwv8_zC8hp8ThIVjZ9omHkCqJuF3KsTZKdCNPwctYAZHXUeM-s41_x4&s",
+            "width": "300",
+            "height": "168"
+          }
+        ],
+        "metatags": [
+          {
+            "og:image": "https://media.licdn.com/dms/image/v2/D4D22AQH58A0tf4vTfA/feedshare-shrink_800/feedshare-shrink_800/0/1733836854647?e=2147483647&v=beta&t=GemSM_TZEt99YsG5MNdiB-yFv2xm5JYb1LJkHG1Y3Ic",
+            "twitter:title": "Rafael Suguihara on LinkedIn: \"We dreamed alone, but together, we believed.\"\n\nGFT Technologies was… | 15 comments",
+            "twitter:card": "summary_large_image",
+            "og:type": "article",
+            "al:ios:app_name": "LinkedIn",
+            "twitter:url": "https://www.linkedin.com/posts/rsuguihara_we-dreamed-alone-but-together-we-believed-activity-7272238861701840896-MdE2",
+            "og:title": "Rafael Suguihara on LinkedIn: \"We dreamed alone, but together, we believed.\"\n\nGFT Technologies was… | 15 comments",
+            "al:android:package": "com.linkedin.android",
+            "pagekey": "p_public_post",
+            "locale": "en_US",
+            "al:ios:url": "https://www.linkedin.com/posts/rsuguihara_we-dreamed-alone-but-together-we-believed-activity-7272238861701840896-MdE2",
+            "og:description": "\"We dreamed alone, but together, we believed.\"\n\nGFT Technologies was recognized last week in Las Vegas at Amazon Web Services (AWS) re:Invent with two… | 15 comments on LinkedIn",
+            "al:ios:app_store_id": "288429040",
+            "twitter:image": "https://media.licdn.com/dms/image/v2/D4D22AQH58A0tf4vTfA/feedshare-shrink_800/feedshare-shrink_800/0/1733836854647?e=2147483647&v=beta&t=GemSM_TZEt99YsG5MNdiB-yFv2xm5JYb1LJkHG1Y3Ic",
+            "al:android:url": "https://www.linkedin.com/posts/rsuguihara_we-dreamed-alone-but-together-we-believed-activity-7272238861701840896-MdE2",
+            "lnkd:url": "https://www.linkedin.com/feed/update/urn:li:activity:7272238861701840896",
+            "twitter:site": "@linkedin",
+            "viewport": "width=device-width, initial-scale=1.0",
+            "twitter:description": "\"We dreamed alone, but together, we believed.\"\n\nGFT Technologies was recognized last week in Las Vegas at Amazon Web Services (AWS) re:Invent with two… | 15 comments on LinkedIn",
+            "og:url": "https://www.linkedin.com/posts/rsuguihara_we-dreamed-alone-but-together-we-believed-activity-7272238861701840896-MdE2",
+            "al:android:app_name": "LinkedIn"
+          }
+        ],
+        "cse_image": [
+          {
+            "src": "https://media.licdn.com/dms/image/v2/D4D22AQH58A0tf4vTfA/feedshare-shrink_800/feedshare-shrink_800/0/1733836854647?e=2147483647&v=beta&t=GemSM_TZEt99YsG5MNdiB-yFv2xm5JYb1LJkHG1Y3Ic"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "Steer Wrestling Joey Dansie 1st",
+      "htmlTitle": "Steer Wrestling Joey Dansie 1st",
+      "link": "https://www.facebook.com/uhsra/posts/steer-wrestling-joey-dansie-1st/2241857609187667/",
+      "displayLink": "www.facebook.com",
+      "snippet": "Jul 5, 2018 ... Utah High School Rodeo Jul 5, 2018 Steer Wrestling Joey Dansie 1st No photo description available. Suzanne Mahoney and 83 others",
+      "htmlSnippet": "Jul 5, 2018 ... Utah High School Rodeo Jul 5, 2018 Steer Wrestling Joey Dansie 1st No photo description available. Suzanne Mahoney and 83 others",
+      "formattedUrl": "https://www.facebook.com/uhsra/posts/steer...dansie.../2241857609187667/",
+      "htmlFormattedUrl": "https://www.facebook.com/uhsra/posts/steer...dansie.../2241857609187667/",
+      "pagemap": {
+        "cse_thumbnail": [
+          {
+            "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzdKS0j06T5PdXtWCzSuNQ4E0X5Rha78YXBzMhs0VdCR8havnOU5DumPnu&s",
+            "width": "260",
+            "height": "194"
+          }
+        ],
+        "metatags": [
+          {
+            "og:image": "https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=2241857579187670",
+            "og:type": "video.other",
+            "og:image:alt": "Utah High School Rodeo",
+            "twitter:card": "summary",
+            "twitter:title": "Utah High School Rodeo",
+            "theme-color": "#FFFFFF",
+            "og:title": "Utah High School Rodeo",
+            "google": "notranslate",
+            "og:description": "Steer Wrestling Joey Dansie 1st",
+            "twitter:image": "https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=2241857579187670",
+            "referrer": "origin-when-crossorigin",
+            "twitter:image:alt": "Utah High School Rodeo",
+            "twitter:site": "@facebookapp",
+            "viewport": "width=device-width, initial-scale=1",
+            "twitter:description": "Steer Wrestling Joey Dansie 1st",
+            "og:locale": "en_US",
+            "fb-version": "452.0.0.0.65:2766",
+            "og:url": "https://www.facebook.com/uhsra/posts/steer-wrestling-joey-dansie-1st/2241857609187667/"
+          }
+        ],
+        "cse_image": [
+          {
+            "src": "https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=2241857579187670"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "700+ \"Dansie\" profiles | LinkedIn",
+      "htmlTitle": "700+ \"Dansie\" profiles | LinkedIn",
+      "link": "https://www.linkedin.com/pub/dir/+/Dansie",
+      "displayLink": "www.linkedin.com",
+      "snippet": "Susanna Dansie. United Kingdom. Stripe, +8 more. , +2 more. Mason Dansie. Technology Leader. Salt Lake City, UT. Sozos Health, +8 more ...",
+      "htmlSnippet": "Susanna Dansie. United Kingdom. Stripe, +8 more. , +2 more. Mason Dansie. Technology Leader. Salt Lake City, UT. Sozos Health, +8 more ...",
+      "formattedUrl": "https://www.linkedin.com/pub/dir/+/Dansie",
+      "htmlFormattedUrl": "https://www.linkedin.com/pub/dir/+/Dansie",
+      "pagemap": {
+        "metatags": [
+          {
+            "og:image": "https://static.licdn.com/aero-v1/sc/h/3usjoqttpyv7mplawrjzi58bw",
+            "og:type": "article",
+            "twitter:card": "summary",
+            "twitter:title": "700+ \"Dansie\" profiles | LinkedIn",
+            "clientsideingraphs": "1",
+            "og:title": "700+ \"Dansie\" profiles | LinkedIn",
+            "pagekey": "p_people_guest_search",
+            "locale": "en_US",
+            "og:description": "View the profiles of professionals named \"Dansie\" on LinkedIn. There are 700+ professionals named \"Dansie\", who use LinkedIn to exchange information, ideas, and opportunities.",
+            "twitter:image": "https://static.licdn.com/aero-v1/sc/h/3usjoqttpyv7mplawrjzi58bw",
+            "twitter:site": "@linkedin",
+            "viewport": "width=device-width, initial-scale=1.0",
+            "twitter:description": "View the profiles of professionals named \"Dansie\" on LinkedIn. There are 700+ professionals named \"Dansie\", who use LinkedIn to exchange information, ideas, and opportunities.",
+            "litmsprofilename": "people-guest-frontend",
+            "og:url": "https://www.linkedin.com/pub/dir/+/Dansie"
+          }
+        ],
+        "cse_image": [
+          {
+            "src": "https://static.licdn.com/aero-v1/sc/h/3usjoqttpyv7mplawrjzi58bw"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "Herald Journal Addendum - Archives West",
+      "htmlTitle": "Herald Journal Addendum - Archives West",
+      "link": "https://archiveswest.orbiscascade.org/ark:80444/xv381102",
+      "displayLink": "archiveswest.orbiscascade.org",
+      "snippet": "... Susan Norman, Kelly Cronquist, day camp, flag project, explorer road ... Dansie, Walter; Manager Presto Products. undated. Box: 48, Folder: 413. Darby ...",
+      "htmlSnippet": "... Susan Norman, Kelly Cronquist, day camp, flag project, explorer road ... Dansie, Walter; Manager Presto Products. undated. Box: 48, Folder: 413. Darby ...",
+      "formattedUrl": "https://archiveswest.orbiscascade.org/ark:80444/xv381102",
+      "htmlFormattedUrl": "https://archiveswest.orbiscascade.org/ark:80444/xv381102",
+      "pagemap": {
+        "metatags": [
+          {
+            "viewport": "width=device-width, initial-scale=1.0"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "Susanna Snobohm - Real Estate Salesperson - Torres Property ...",
+      "htmlTitle": "Susanna Snobohm - Real Estate Salesperson - Torres Property ...",
+      "link": "https://au.linkedin.com/in/susanna-snobohm",
+      "displayLink": "au.linkedin.com",
+      "snippet": "Real Estate Agent · My drive is to produce the best possible outcome for both seller and buyer, and I find my work very rewarding.",
+      "htmlSnippet": "Real Estate Agent · My drive is to produce the best possible outcome for both seller and buyer, and I find my work very rewarding.",
+      "formattedUrl": "https://au.linkedin.com/in/susanna-snobohm",
+      "htmlFormattedUrl": "https://au.linkedin.com/in/susanna-snobohm",
+      "pagemap": {
+        "cse_thumbnail": [
+          {
+            "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2fbxpa157CLISkxxg8y5T91uz_Ce8JOwwURrtdk2fPzMnkfFquJK3&s",
+            "width": "96",
+            "height": "96"
+          }
+        ],
+        "metatags": [
+          {
+            "og:image": "https://static.licdn.com/scds/common/u/images/email/artdeco/logos/96/linkedin-bug-color.png",
+            "twitter:card": "summary",
+            "linkedin:pagetag": "openToProvider",
+            "platform-worker": "https://static.licdn.com/aero-v1/sc/h/7nirg34a8ey4y2l4rw7xgwxx4",
+            "al:android:package": "com.linkedin.android",
+            "bingbot": "nocache",
+            "locale": "en_US",
+            "al:ios:url": "https://au.linkedin.com/in/susanna-snobohm",
+            "og:description": "Real Estate Agent · My drive is to produce the best possible outcome for both seller and buyer, and I find my work very rewarding.\n\nI consider myself to be a positive, ambitious, responsible, and sociable person. I’m a ‘team player’ but also an autonomous and loyal worker who is efficient, well presented, and artistic. · Experience: Torres Property · Location: Greater Brisbane Area · 500+ connections on LinkedIn. View Susanna Snobohm’s profile on LinkedIn, a professional community of 1 billion members.",
+            "al:ios:app_store_id": "288429040",
+            "platform": "https://static.licdn.com/aero-v1/sc/h/exkw4l4akgsym3om6tnupboq6",
+            "twitter:image": "https://media.licdn.com/dms/image/v2/D5603AQEivSHu8yx2Lw/profile-displayphoto-shrink_200_200/B56ZNqI.3uGwAY-/0/1732652560368?e=2147483647&v=beta&t=3GBxIt3I8YrT2ZwYOrYbuPRrmkrGUPphKpJnFbZjSjo",
+            "profile:last_name": "Snobohm",
+            "twitter:site": "@Linkedin",
+            "litmsprofilename": "public-profile-frontend",
+            "profile:first_name": "Susanna",
+            "og:type": "profile",
+            "twitter:title": "Susanna Snobohm - Real Estate Salesperson - Torres Property | LinkedIn",
+            "al:ios:app_name": "LinkedIn",
+            "og:title": "Susanna Snobohm - Real Estate Salesperson - Torres Property | LinkedIn",
+            "pagekey": "public_profile_v3_mobile",
+            "al:android:url": "https://au.linkedin.com/in/susanna-snobohm",
+            "viewport": "width=device-width, initial-scale=1.0",
+            "twitter:description": "Real Estate Agent · My drive is to produce the best possible outcome for both seller and buyer, and I find my work very rewarding.\n\nI consider myself to be a positive, ambitious, responsible, and sociable person. I’m a ‘team player’ but also an autonomous and loyal worker who is efficient, well presented, and artistic. · Experience: Torres Property · Location: Greater Brisbane Area · 500+ connections on LinkedIn. View Susanna Snobohm’s profile on LinkedIn, a professional community of 1 billion members.",
+            "ubba": "https://static.licdn.com/aero-v1/sc/h/dlxevueaszn1k5tiemxu7kmqy",
+            "og:url": "https://au.linkedin.com/in/susanna-snobohm",
+            "al:android:app_name": "LinkedIn"
+          }
+        ],
+        "cse_image": [
+          {
+            "src": "https://static.licdn.com/scds/common/u/images/email/artdeco/logos/96/linkedin-bug-color.png"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "faves-phone-numbers-faa-2023-07164.pdf",
+      "htmlTitle": "faves-phone-numbers-faa-2023-07164.pdf",
+      "link": "https://www.faa.gov/foia/electronic_reading_room/faves-phone-numbers-faa-2023-07164.pdf",
+      "displayLink": "www.faa.gov",
+      "snippet": "... Dansie, Matthew. 16094857694 D'Antonio, Vincent. 12022670531 Dantzler, Adelle ... Stripe, Justin. 14059547858 Stroble, Evette. 16094856256 Stroby, Douglas.",
+      "htmlSnippet": "... Dansie, Matthew. 16094857694 D'Antonio, Vincent. 12022670531 Dantzler, Adelle ... Stripe, Justin. 14059547858 Stroble, Evette. 16094856256 Stroby, Douglas.",
+      "formattedUrl": "https://www.faa.gov/foia/.../faves-phone-numbers-faa-2023-07164.pdf",
+      "htmlFormattedUrl": "https://www.faa.gov/foia/.../faves-phone-numbers-faa-2023-07164.pdf",
+      "pagemap": {
+        "metatags": [
+          {
+            "moddate": "D:20240617102052-04'00'",
+            "creationdate": "D:20240503113715-04'00'",
+            "creator": "PScript5.dll Version 5.2.2",
+            "author": "Jeremy Schulze",
+            "producer": "Acrobat Distiller 23.0 (Windows)",
+            "title": "FAVES Phone Numbers - Cleaned.xlsx"
+          }
+        ]
+      },
+      "mime": "application/pdf",
+      "fileFormat": "PDF/Adobe Acrobat"
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "Graduation",
+      "htmlTitle": "Graduation",
+      "link": "https://cdn.csu.edu.au/__data/assets/pdf_file/0006/4361487/April-June-2024-Graduation-Program.pdf",
+      "displayLink": "cdn.csu.edu.au",
+      "snippet": "John Robert Dansie. Master of. Pastoral Counselling. With Distinction ... Caitlyn Susanna Wardius. Bachelor of Education. (K - 12). With Distinction ...",
+      "htmlSnippet": "John Robert Dansie. Master of. Pastoral Counselling. With Distinction ... Caitlyn Susanna Wardius. Bachelor of Education. (K - 12). With Distinction ...",
+      "formattedUrl": "https://cdn.csu.edu.au/__data/.../April-June-2024-Graduation-Program.pdf",
+      "htmlFormattedUrl": "https://cdn.csu.edu.au/__data/.../April-June-2024-Graduation-Program.pdf",
+      "pagemap": {
+        "cse_thumbnail": [
+          {
+            "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQILLfug3WtHH_K4n4HtTadSdiooXhZ5TEl_OcV27lqIgmoBGwWskhtYKc&s",
+            "width": "257",
+            "height": "196"
+          }
+        ],
+        "metatags": [
+          {
+            "moddate": "D:20250203150243+11'00'",
+            "creationdate": "D:20250203150229+11'00'",
+            "creator": "Adobe Acrobat Pro (64-bit) 23.1.20143",
+            "producer": "Adobe PDF Library 17.0"
+          }
+        ],
+        "cse_image": [
+          {
+            "src": "x-raw-image:///c474f02165204e1dc1eb59fc0c058f04ff0f454d6134a91992e37146fac2d4f4"
+          }
+        ]
+      },
+      "mime": "application/pdf",
+      "fileFormat": "PDF/Adobe Acrobat"
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "Extracts3",
+      "htmlTitle": "Extracts3",
+      "link": "https://freepages.rootsweb.com/~mrawson/genealogy/extr3.html",
+      "displayLink": "freepages.rootsweb.com",
+      "snippet": "Will of his widow SUSANNAH FILMER, 1875. Source: Archdeaconry Court of Canterbury Vol.110 folio 627 Probate 21 Feb 1842. WILLIAM FILMER, of Dover Lane, parish ...",
+      "htmlSnippet": "Will of his widow SUSANNAH FILMER, 1875. Source: Archdeaconry Court of Canterbury Vol.110 folio 627 Probate 21 Feb 1842. WILLIAM FILMER, of Dover Lane, parish ...",
+      "formattedUrl": "https://freepages.rootsweb.com/~mrawson/genealogy/extr3.html",
+      "htmlFormattedUrl": "https://freepages.rootsweb.com/~mrawson/genealogy/extr3.html"
+    },
+    {
+      "kind": "customsearch#result",
+      "title": "Walker & CP Konea Sweep Idaho Futurity",
+      "htmlTitle": "Walker & CP Konea Sweep Idaho Futurity",
+      "link": "https://barrelracingreport.com/issues/6_11_13_BarrelRacingReport_HighRes.pdf",
+      "displayLink": "barrelracingreport.com",
+      "snippet": "Jun 11, 2013 ... 10 Runn Oft, Suzanne Thompson, 15.707, $278. 11 Brother Smokem, Rhonda Dansie, 15.709, $238. 12 Showboats Effort, Jessica Jones, 15.728, $206.",
+      "htmlSnippet": "Jun 11, 2013 ... 10 Runn Oft, Suzanne Thompson, 15.707, $278. 11 Brother Smokem, Rhonda Dansie, 15.709, $238. 12 Showboats Effort, Jessica Jones, 15.728, $206.",
+      "formattedUrl": "https://barrelracingreport.com/.../6_11_13_BarrelRacingReport_HighRes.p...",
+      "htmlFormattedUrl": "https://barrelracingreport.com/.../6_11_13_BarrelRacingReport_HighRes.p...",
+      "pagemap": {
+        "cse_thumbnail": [
+          {
+            "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQd144-EK-AJABw6RV6W-f3gLr-RedT5ZZAGL5rZVlx77ArCTrdbV172p0&s",
+            "width": "275",
+            "height": "183"
+          }
+        ],
+        "metatags": [
+          {
+            "moddate": "D:20130612030549-05'00'",
+            "creationdate": "D:20130612021954-05'00'",
+            "creator": "Adobe InDesign CS3 (5.0.4)",
+            "producer": "Adobe PDF Library 8.0"
+          }
+        ],
+        "cse_image": [
+          {
+            "src": "x-raw-image:///667c674fffb2b0e3cf23e5e8754aca5f4be89ebca28d41296390b9510b73540f"
+          }
+        ]
+      },
+      "mime": "application/pdf",
+      "fileFormat": "PDF/Adobe Acrobat"
+    }
+  ]
+}
