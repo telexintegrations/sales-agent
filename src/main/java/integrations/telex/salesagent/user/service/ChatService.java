@@ -31,11 +31,11 @@ public class ChatService {
     private final ObjectMapper objectMapper;
     private final LeadService leadService;
     private final ChatModel chatModel;
+    private final ColdEmailService coldEmailService;
 
     private final Map<String, List<String>> channelResponses = new ConcurrentHashMap<>();
 
     public void processMessage(String payload) throws JsonProcessingException {
-        //List<Lead> leads = new ArrayList<>();
         JsonNode jsonNode = objectMapper.readTree(payload);
         String htmlMessage = jsonNode.get("message").asText();
         String message = requestFormatter.stripHtml(htmlMessage);
@@ -130,13 +130,15 @@ public class ChatService {
             userResponses.add(domain);
             saveUser(userResponses, channelId);
 
+
+            coldEmailService.getColdEmailParams(channelId, message);
+
+
             String instruction = "Your search criteria have been saved. We will notify you when we find leads matching your criteria.";
             telexClient.sendInstruction(channelId, instruction);
 
             channelResponses.remove(channelId);
-            callDomainSearchEndpoint(channelId, message);
-
-            //leads.addAll(callDomainSearchEndpoint(channelId));
+            callDomainSearchEndpoint(channelId);
 
         }
     }
@@ -194,8 +196,8 @@ public class ChatService {
 //        return leadService.domainSearch(channelId);
 //    }
 
-    private void callDomainSearchEndpoint(String channelId, String message) {
-        leadService.domainSearch(channelId, message);
+    private void callDomainSearchEndpoint(String channelId) {
+        leadService.domainSearch(channelId);
     }
 
 
