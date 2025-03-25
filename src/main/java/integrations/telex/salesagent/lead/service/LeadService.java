@@ -94,6 +94,7 @@ public class LeadService {
     }
     public void domainSearch(String channelId) {
         try {
+            log.info("called domain search");
             Optional<User> userOptional = userRepository.findByChannelId(channelId);
 
             if (userOptional.isEmpty()) {

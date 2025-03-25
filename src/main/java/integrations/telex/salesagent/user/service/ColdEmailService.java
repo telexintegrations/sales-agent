@@ -120,7 +120,7 @@ public class ColdEmailService {
 //                .build();
     }
 
-    public void generateColdEmails(ColdEmail coldEmailParams, Lead lead){
+    public void generateColdEmails(ColdEmail coldEmail, Lead lead){
         List<String> emails = new ArrayList<>();
         String prompt =
                 "A lead named " + lead.getName() +
@@ -128,9 +128,9 @@ public class ColdEmailService {
                         ", who works at " + lead.getCompany() +
                         ", in the " + lead.getIndustry() + " industry. " +
                         "Generate a concise and personalized cold email to this person. " +
-                        "My name is " + coldEmailParams.getName() + " from "+ coldEmailParams.getCompanyName() +
-                        " as the/a " + coldEmailParams.getJobTitle() + "."+
-                        "Focus on highlighting the value of our product/service ("+ coldEmailParams.getProductName() +")" +
+                        "My name is " + coldEmail.getName() + " from "+ coldEmail.getCompanyName() +
+                        " as the/a " + coldEmail.getJobTitle() + "."+
+                        "Focus on highlighting the value of our product/service ("+ coldEmail.getProductName() +")" +
                         " by addressing" +
                         " potential challenges they may face in their industry, and include an engaging" +
                         " call to action to encourage a response.";
@@ -144,7 +144,7 @@ public class ColdEmailService {
             for (String email:
                     emails) {
                 try {
-                    telexClient.sendInstruction(coldEmailParams.getChannelId(), email);
+                    telexClient.sendInstruction(coldEmail.getChannelId(), email);
                     return;
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);

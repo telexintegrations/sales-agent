@@ -182,13 +182,6 @@ public class ChatService {
                 telexClient.failedInstruction(channelId, instruction);
                 return;
             }
-//            if (!message.startsWith("Company:")) {
-//                String instruction = "Please provide your company starting with the word Company\n " +
-//                        "e.g. Company: linkedin";
-//                telexClient.failedInstruction(channelId, instruction);
-//                return;
-//            }
-//            String extractedCompany = message.replace("Company:", "").trim();
             userResponses.add(message);
             String instruction = "Enter your jobTitle for email personalization ";
             telexClient.sendInstruction(channelId, instruction);
