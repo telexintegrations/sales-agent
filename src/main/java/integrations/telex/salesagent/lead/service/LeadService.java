@@ -55,6 +55,7 @@ public class LeadService {
     private final TelexClient telexClient;
     private final LeadResearchService leadResearchService;
     private final ColdEmailService coldEmailService;
+    private ColdEmailParams coldEmailParams;
 
     private List<Lead> defaultLeads;
 
@@ -90,13 +91,13 @@ public class LeadService {
             return ResponseEntity.internalServerError().body(error.getMessage());
         }
     }
-    public void domainSearch(String channelId, String message) {
+    public void domainSearch(String channelId) {
         try {
             Optional<User> userOptional = userRepository.findByChannelId(channelId);
 
             if (userOptional.isEmpty()) {
-                String response = "User not found. Please provide a valid user.";
-                telexClient.failedInstruction(channelId, response);
+                String message = "User not found. Please provide a valid user.";
+                telexClient.failedInstruction(channelId, message);
                 return;
             }
 
@@ -149,8 +150,6 @@ public class LeadService {
 //                ColdEmailParams coldEmailParams = coldEmailService.getColdEmailParams(channelId,message);
 //                coldEmailService.generateColdEmails(coldEmailParams,leads);
 //            }
-
-            ColdEmailParams coldEmailParams = coldEmailService.getColdEmailParams(channelId,message);
 
 
             leadRepository.saveAll(newLeads);
