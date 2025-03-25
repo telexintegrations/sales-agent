@@ -101,7 +101,7 @@ public class ChatService {
                 exitProcess(channelId);
                 return;
             }
-            if (message.isEmpty() || !isValidCompany(message)) {
+            if (message.isEmpty()) {
                 String instruction = "Please provide the company you're looking for leads from. e.g. linkedin";
                 telexClient.failedInstruction(channelId, instruction);
                 return;
