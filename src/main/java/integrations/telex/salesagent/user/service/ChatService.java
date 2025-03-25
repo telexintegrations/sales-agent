@@ -3,10 +3,8 @@ package integrations.telex.salesagent.user.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import integrations.telex.salesagent.lead.model.Lead;
 import integrations.telex.salesagent.lead.service.LeadService;
 import integrations.telex.salesagent.telex.service.TelexClient;
-import integrations.telex.salesagent.user.dto.request.ColdEmailParams;
 import integrations.telex.salesagent.user.model.ColdEmail;
 import integrations.telex.salesagent.user.model.User;
 import integrations.telex.salesagent.user.repository.ColdEmailRepository;
@@ -22,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -202,7 +199,7 @@ public class ChatService {
             String instruction = "Your responses have been saved to generate emails for your leads.";
             telexClient.sendInstruction(channelId, instruction);
 
-            Optional<User> userOptional = userRepository.findByChannelId(channelId);
+            Optional<User> userOptional = userRepository.findByEmail(userResponses.get(1));
 
             if (userOptional.isEmpty()) {
                 String response = "User not found. Please provide a valid user.";
@@ -212,6 +209,8 @@ public class ChatService {
 
             User user = userOptional.get();
             String userId = user.getId();
+
+            log.info("user found: " + userId);
 
             saveColdEmailResponses(userResponses, userId, channelId);
 
@@ -271,10 +270,10 @@ public class ChatService {
 
     private void saveColdEmailResponses(List<String> responses, String userId, String channelId) {
         ColdEmail coldEmail = new ColdEmail();
-        coldEmail.setName(responses.get(5));
-        coldEmail.setProductName(responses.get(6));
-        coldEmail.setCompanyName(responses.get(7));
-        coldEmail.setJobTitle(responses.get(8));
+        coldEmail.setName(responses.get(4));
+        coldEmail.setProductName(responses.get(5));
+        coldEmail.setCompanyName(responses.get(6));
+        coldEmail.setJobTitle(responses.get(7));
         coldEmail.setUserId(userId);
         coldEmail.setChannelId(channelId);
         coldEmailRepository.save(coldEmail);

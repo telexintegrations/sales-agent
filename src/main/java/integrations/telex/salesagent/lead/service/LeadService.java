@@ -12,6 +12,7 @@ import integrations.telex.salesagent.telex.service.TelexClient;
 import integrations.telex.salesagent.user.dto.request.ColdEmailParams;
 import integrations.telex.salesagent.user.model.ColdEmail;
 import integrations.telex.salesagent.user.model.User;
+import integrations.telex.salesagent.user.repository.ColdEmailRepository;
 import integrations.telex.salesagent.user.repository.UserRepository;
 import integrations.telex.salesagent.user.service.ColdEmailService;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +57,8 @@ public class LeadService {
     private final TelexClient telexClient;
     private final LeadResearchService leadResearchService;
     private final ColdEmailService coldEmailService;
-    private ColdEmail coldEmail;
+    private final ColdEmailRepository coldEmailRepository;
+//    private ColdEmail coldEmail;
 
     private List<Lead> defaultLeads;
 
@@ -152,11 +154,12 @@ public class LeadService {
 //                ColdEmailParams coldEmailParams = coldEmailService.getColdEmailParams(channelId,message);
 //                coldEmailService.generateColdEmails(coldEmailParams,leads);
 //            }
+           Optional<ColdEmail> coldEmail = coldEmailRepository.findByChannelId(channelId);
 
             for (Lead lead : newLeads) {
                 telexClient.processTelexPayload(channelId, lead);
-                leadResearchService.fetchLeadReport(lead);
-                coldEmailService.generateColdEmails(coldEmail,lead);
+                leadResearchService.fetchLeadReport(lead, channelId);
+                coldEmailService.generateColdEmails(coldEmail.get(),lead);
             }
 
             leadRepository.saveAll(newLeads);

@@ -33,5 +33,7 @@ public class Lead {
 
     private String linkedInUrl;
 
+
+
     private LocalDateTime createdAt = LocalDateTime.now();
 }
