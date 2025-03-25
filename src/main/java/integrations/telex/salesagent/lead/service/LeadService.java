@@ -10,6 +10,7 @@ import integrations.telex.salesagent.lead.model.Lead;
 import integrations.telex.salesagent.lead.repository.LeadRepository;
 import integrations.telex.salesagent.telex.service.TelexClient;
 import integrations.telex.salesagent.user.dto.request.ColdEmailParams;
+import integrations.telex.salesagent.user.model.ColdEmail;
 import integrations.telex.salesagent.user.model.User;
 import integrations.telex.salesagent.user.repository.UserRepository;
 import integrations.telex.salesagent.user.service.ColdEmailService;
@@ -55,7 +56,7 @@ public class LeadService {
     private final TelexClient telexClient;
     private final LeadResearchService leadResearchService;
     private final ColdEmailService coldEmailService;
-    private ColdEmailParams coldEmailParams;
+    private ColdEmail coldEmail;
 
     private List<Lead> defaultLeads;
 
@@ -157,7 +158,7 @@ public class LeadService {
             for (Lead lead : newLeads) {
                 telexClient.processTelexPayload(channelId, lead);
                 leadResearchService.fetchLeadReport(lead);
-                coldEmailService.generateColdEmails(coldEmailParams,lead);
+                coldEmailService.generateColdEmails(coldEmail,lead);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
