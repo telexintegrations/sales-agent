@@ -1,8 +1,12 @@
 package integrations.telex.salesagent.lead.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import integrations.telex.salesagent.config.AppConfig;
 import integrations.telex.salesagent.lead.dto.GoogleSearchResponse;
 import integrations.telex.salesagent.lead.model.Lead;
+import integrations.telex.salesagent.telex.service.TelexClient;
+import integrations.telex.salesagent.user.dto.request.TelexPayload;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,8 +21,10 @@ import java.util.List;
 public class LeadResearchService {
     private final RestClient restClient = RestClient.create();
     private final AppConfig appConfig;
+    private final TelexClient telexClient;
+    ObjectMapper objectMapper = new ObjectMapper();
 
-    public String fetchLeadReport(Lead lead) {
+    public void fetchLeadReport(Lead lead, String channelId) throws JsonProcessingException {
     String apiKey = appConfig.getGoogleApiKey();
     String searchEngineId =  appConfig.getGoogleSearchEngineId();
     String baseURL = appConfig.getGoogleUrl();
@@ -30,7 +36,9 @@ public class LeadResearchService {
             .retrieve()
             .body(GoogleSearchResponse.class);
 
-    return formatLeadReport(searchResponse, lead.getName());
+    String response  =  formatLeadReport(searchResponse, lead.getName());
+    TelexPayload telexPayload = new TelexPayload("Research Analysis", "Sales Agent", "success", response);
+    telexClient.sendToTelexChannel(channelId, objectMapper.writeValueAsString(telexPayload));
     }
 
     private String formatLeadReport(GoogleSearchResponse searchResponse, String leadName) {
@@ -53,7 +61,7 @@ public class LeadResearchService {
             String link = item.getLink().toLowerCase();
             if (link.contains("linkedin.com/in/")) {
                 linkedinProfiles.add(item);
-            } else if (link.contains("twitter.com") || link.contains("github.com")) {
+            } else if (link.contains("twitter.com") || link.contains("github.com") || link.contains("x.com") || link.contains("instagram.com") ) {
                 socialMedia.add(item);
             } else if (link.contains("technews") || link.contains("news")) {
                 newsMentions.add(item);
@@ -66,7 +74,6 @@ public class LeadResearchService {
         appendCategory(report, "Social Media", socialMedia);
         appendCategory(report, "News Mentions", newsMentions);
         appendCategory(report, "Other References", otherReferences);
-        log.info(report.toString());
         return report.toString();
     }
 
