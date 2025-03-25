@@ -152,14 +152,13 @@ public class LeadService {
 //                coldEmailService.generateColdEmails(coldEmailParams,leads);
 //            }
 
-
-            leadRepository.saveAll(newLeads);
-
             for (Lead lead : newLeads) {
                 telexClient.processTelexPayload(channelId, lead);
                 leadResearchService.fetchLeadReport(lead);
                 coldEmailService.generateColdEmails(coldEmail,lead);
             }
+
+            leadRepository.saveAll(newLeads);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
