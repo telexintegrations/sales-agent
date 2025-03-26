@@ -54,15 +54,17 @@ public class ChatService {
 
         List<String> userResponses = channelResponses.computeIfAbsent(channelId, k -> new ArrayList<>());
 
-        if ((userResponses.size() == 1 || userResponses.size() == 2 || userResponses.size() == 3) && message.equalsIgnoreCase("/start")) {
+        if ((userResponses.size() == 1 || userResponses.size() == 2 || userResponses.size() == 3) || (userResponses.size() == 4) || (userResponses.size() == 5) || (userResponses.size() == 6) && message.equalsIgnoreCase("/start")) {
             userResponses.clear();
         }
 
         if (userResponses.isEmpty()) {
-            if (isSaleAgentCalled(message) || message.contains("/start")) {
-                userResponses.add("/start");
-                String instruction = "Welcome! Please provide your business email address starting with Email. " +
-                        "\n e.g. test@example.com";
+            if (isSaleAgentCalled(message) || message.contains("start-sales-agent")) {
+                userResponses.add("start-sales-agent");
+                String instruction = """
+                        Welcome!\s
+                        Please provide your business email address starting with Email. \
+                        e.g. test@example.com""";
                 telexClient.sendInstruction(channelId, instruction);
             } else {
                 log.info(isSaleAgentCalled(message).toString());
@@ -71,7 +73,6 @@ public class ChatService {
         }
 
         if (userResponses.size() == 1) {
-
             if (message.equalsIgnoreCase("/exit")) {
                 exitProcess(channelId);
                 return;
@@ -79,9 +80,10 @@ public class ChatService {
             String email = message.trim();
 
             if (!isValidEmail(email)) {
-                String instruction = "Invalid Email Address. Please provide a valid email address.\n" +
-                        "e.g. test@example.com";
-
+                String instruction = """
+                        Invalid Email Address. Please provide a valid email address.\s
+                        e.g. test@example.com
+                        """;
                 telexClient.failedInstruction(channelId, instruction);
                 return;
             }
@@ -91,8 +93,10 @@ public class ChatService {
                 return;
             }
             userResponses.add(email);
-            String instruction = "Please provide the company you're looking for leads from." +
-                    "e.g. linkedin";
+            String instruction = """
+                    Please provide the platform you're looking for leads from.\s
+                    e.g. linkedin
+                    """;
             telexClient.sendInstruction(channelId, instruction);
             return;
         }
@@ -103,14 +107,15 @@ public class ChatService {
                 return;
             }
             if (message.isEmpty()) {
-                String instruction = "Please provide the company you're looking for leads from. e.g. linkedin";
+                String instruction = "Please provide the platform you're looking for leads from. e.g. linkedin";
                 telexClient.failedInstruction(channelId, instruction);
                 return;
             }
             String extractedCompany = message.trim();
             userResponses.add(extractedCompany);
             String instruction = "What are you looking for?\n" +
-                    "Enter the domain you would like to search for leads e.g. linkedin.com";
+                    "Enter the domain you would like to search for leads\n" +
+                    "e.g. linkedin.com";
             telexClient.sendInstruction(channelId, instruction);
             return;
         }
@@ -127,7 +132,6 @@ public class ChatService {
                 telexClient.failedInstruction(channelId, instruction);
                 return;
             }
-
             userResponses.add(domain);
             saveUser(userResponses, channelId);
 
@@ -147,7 +151,11 @@ public class ChatService {
                 return;
             } else if (message.equalsIgnoreCase("yes")) {
                 userResponses.add("yes");
-                telexClient.sendInstruction(channelId, "Enter your name for email personalization");
+                String instruction = """
+                        Enter your name for email personalization\s
+                        e.g. John Doe
+                        """;
+                telexClient.sendInstruction(channelId, instruction);
                 return;
             }
             return;
@@ -164,7 +172,10 @@ public class ChatService {
                 return;
             }
             userResponses.add(message.trim());
-            String instruction = "Enter your product name for email personalization ";
+            String instruction = """
+                    Enter your product name for email personalization\s
+                    e.g. communication
+                    """;
             telexClient.sendInstruction(channelId, instruction);
             return;
         }
@@ -175,12 +186,18 @@ public class ChatService {
                 return;
             }
             if (message.isEmpty()) {
-                String instruction = "Enter your product name for email personalization ";
+                String instruction = """
+                    Enter your product name for email personalization\s
+                    e.g. communication
+                    """;
                 telexClient.failedInstruction(channelId, instruction);
                 return;
             }
             userResponses.add(message);
-            String instruction = "Enter your jobTitle for email personalization ";
+            String instruction = """
+                    Enter the name of your company for email personalization\s
+                    e.g. Telex
+                    """;
             telexClient.sendInstruction(channelId, instruction);
             return;
         }
@@ -191,7 +208,32 @@ public class ChatService {
                 return;
             }
             if (message.isEmpty()) {
-                String instruction = "Enter your jobTitle for email personalization ";
+                String instruction = """
+                    Enter the name of your company for email personalization\s
+                    e.g. Telex
+                    """;
+                telexClient.failedInstruction(channelId, instruction);
+                return;
+            }
+            userResponses.add(message);
+            String instruction = """
+                    Enter your jobTitle for email personalization\s
+                    e.g. Software Engineer
+                    """;
+            telexClient.sendInstruction(channelId, instruction);
+            return;
+        }
+
+        if (userResponses.size() == 8){
+            if (message.equalsIgnoreCase("/exit")) {
+                exitProcess(channelId);
+                return;
+            }
+            if (message.isEmpty()) {
+                String instruction = """
+                    Enter your jobTitle for email personalization\s
+                    e.g. Software Engineer
+                    """;
                 telexClient.failedInstruction(channelId, instruction);
                 return;
             }
@@ -209,8 +251,6 @@ public class ChatService {
 
             User user = userOptional.get();
             String userId = user.getId();
-
-            log.info("user found: " + userId);
 
             saveColdEmailResponses(userResponses, userId, channelId);
 
@@ -270,27 +310,19 @@ public class ChatService {
 
     private void saveColdEmailResponses(List<String> responses, String userId, String channelId) {
         ColdEmail coldEmail = new ColdEmail();
-        coldEmail.setName(responses.get(4));
-        coldEmail.setProductName(responses.get(5));
-        coldEmail.setCompanyName(responses.get(6));
-        coldEmail.setJobTitle(responses.get(7));
+        coldEmail.setName(responses.get(5));
+        coldEmail.setProductName(responses.get(6));
+        coldEmail.setCompanyName(responses.get(7));
+        coldEmail.setJobTitle(responses.get(8));
         coldEmail.setUserId(userId);
         coldEmail.setChannelId(channelId);
         coldEmailRepository.save(coldEmail);
     }
 
-//    private List<Lead> callDomainSearchEndpoint(String channelId) {
-//        return leadService.domainSearch(channelId);
-//    }
 
     private void callDomainSearchEndpoint(String channelId) {
         leadService.domainSearch(channelId);
     }
-
-    private void coldEmailParams(String channelId, String message) throws JsonProcessingException {
-        coldEmailService.getColdEmailParams(channelId, message);
-    }
-
 
     private Boolean isSaleAgentCalled(String message){
         String request = String.format("Carefully analyze the following text and determine whether it relates to lead" +
