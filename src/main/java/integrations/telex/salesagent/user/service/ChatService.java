@@ -31,12 +31,12 @@ public class ChatService {
     private final ObjectMapper objectMapper;
     private final LeadService leadService;
     private final ChatModel chatModel;
-    private final ColdEmailService coldEmailService;
     private final ColdEmailRepository coldEmailRepository;
 
     private final Map<String, List<String>> channelResponses = new ConcurrentHashMap<>();
 
     public void processMessage(String payload) throws JsonProcessingException {
+        log.info("Telex Payload in the service class , {}", payload);
         JsonNode jsonNode = objectMapper.readTree(payload);
         String htmlMessage = jsonNode.get("message").asText();
         String message = requestFormatter.stripHtml(htmlMessage);
@@ -59,8 +59,8 @@ public class ChatService {
         }
 
         if (userResponses.isEmpty()) {
-            if (isSaleAgentCalled(message) || message.contains("start-sales-agent")) {
-                userResponses.add("start-sales-agent");
+            if (isSaleAgentCalled(message) || message.contains("/start")) {
+                userResponses.add("/start");
                 String instruction = """
                         Welcome!\s
                         Please provide your business email address starting with Email. \

@@ -58,7 +58,6 @@ public class LeadService {
     private final LeadResearchService leadResearchService;
     private final ColdEmailService coldEmailService;
     private final ColdEmailRepository coldEmailRepository;
-//    private ColdEmail coldEmail;
 
     private List<Lead> defaultLeads;
 
@@ -147,13 +146,6 @@ public class LeadService {
                             !existingLeadsMap.get(lead.getEmail()).equals(userId))
                     .toList();
 
-//            if(newLeads.isEmpty()) {
-//                exitProcess(channelId);
-//                return;
-//            }else {
-//                ColdEmailParams coldEmailParams = coldEmailService.getColdEmailParams(channelId,message);
-//                coldEmailService.generateColdEmails(coldEmailParams,leads);
-//            }
            Optional<ColdEmail> coldEmail = coldEmailRepository.findByChannelId(channelId);
 
             for (Lead lead : newLeads) {
