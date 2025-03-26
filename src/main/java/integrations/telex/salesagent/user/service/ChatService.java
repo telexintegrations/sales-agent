@@ -54,7 +54,7 @@ public class ChatService {
 
         List<String> userResponses = channelResponses.computeIfAbsent(channelId, k -> new ArrayList<>());
 
-        if ((userResponses.size() == 1 || userResponses.size() == 2 || userResponses.size() == 3) || (userResponses.size() == 4) || (userResponses.size() == 5) || (userResponses.size() == 6) && message.equalsIgnoreCase("/start")) {
+        if ((userResponses.size() == 1 || userResponses.size() == 2 || userResponses.size() == 3) && message.equalsIgnoreCase("/start")) {
             userResponses.clear();
         }
 
@@ -63,7 +63,7 @@ public class ChatService {
                 userResponses.add("/start");
                 String instruction = """
                         Welcome!\s
-                        Please provide your business email address starting with Email. \
+                        Please provide your business email address.\s
                         e.g. test@example.com""";
                 telexClient.sendInstruction(channelId, instruction);
             } else {
