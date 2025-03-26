@@ -37,7 +37,7 @@ The chat interaction between business owners and the sales agent takes place in 
 #### Interaction Flow
 
 1. **Starting the Process**:
-    - Users begin the process by sending the `/start` command.
+    - Users begin the process by sending the `start-sales-agent` command.
     - The system responds with a welcome message and prompts users to provide their business email address.
 
        ![Step 1: Starting the Process](src/main/resources/static/sales-agent/1.png)
@@ -55,13 +55,13 @@ The chat interaction between business owners and the sales agent takes place in 
    
       ![Step 3: Email Validation](src/main/resources/static/sales-agent/2.png)
 4. **Company Information**:
-    - Users are prompted to specify the company they are targeting by starting their response with `Company:` (e.g., `Company: linkedin`).
+    - Users are prompted to specify the platform they are targeting to get leads. The Agent can search for leads from any of the following platforms `linkedin`, `x (formerly twitter)`, `stripe`, `google`.
     - Input is validated to ensure it follows the required format.
 
       ![Step 3: Company Information](src/main/resources/static/sales-agent/4.png)
 
 5. **Lead Type**:
-    - Users specify the type of lead they need by providing the lead's domain name (e.g., `linkedin.com`).
+    - Users specify the type of lead they need by providing the lead's domain name (e.g., `linkedin.com`, `x.com`, `google.com`, `stripe.com`).
 
       ![Step 4: Lead Type](src/main/resources/static/sales-agent/5.png)
 
