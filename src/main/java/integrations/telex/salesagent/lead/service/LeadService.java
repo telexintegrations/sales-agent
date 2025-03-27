@@ -53,13 +53,10 @@ public class LeadService {
     private final ObjectMapper objectMapper;
 
     private final UserRepository userRepository;
-
-    private final TelexClient telexClient;
     private final LeadResearchService leadResearchService;
+    private final TelexClient telexClient;
     private final ColdEmailService coldEmailService;
     private final ColdEmailRepository coldEmailRepository;
-
-    private List<Lead> defaultLeads;
 
     /**
      * Retrieves all leads with pagination.
@@ -69,6 +66,10 @@ public class LeadService {
      */
     public Page<Lead> getAllLeads(Pageable pageable) {
         return leadRepository.findAll(pageable);
+    }
+
+    public List<Lead> findAllLeads(Pageable pageable) {
+        return leadRepository.findAll();
     }
 
     /**
@@ -137,28 +138,32 @@ public class LeadService {
             });
 
             List<Lead> existingLeads = leadRepository.findAll();
-
-            Map<String, String> existingLeadsMap = existingLeads.stream()
-                    .collect(Collectors.toMap(Lead::getEmail, Lead::getUserId, (existing, replacement) -> existing));
-
-            List<Lead> newLeads = leads.stream()
-                    .filter(lead -> !existingLeadsMap.containsKey(lead.getEmail()) ||
-                            !existingLeadsMap.get(lead.getEmail()).equals(userId))
-                    .toList();
+            List<Lead> newLeads = checkIfLeadsExists(leads,channelId,existingLeads);
 
            Optional<ColdEmail> coldEmail = coldEmailRepository.findByChannelId(channelId);
 
             for (Lead lead : newLeads) {
                 telexClient.processTelexPayload(channelId, lead);
-                leadResearchService.fetchLeadReport(lead, channelId);
-                coldEmailService.generateColdEmails(coldEmail.get(),lead);
+                leadResearchService.fetchLeadReport(lead,channelId);
+                coldEmail.ifPresent(email -> coldEmailService.generateColdEmails(email, lead));
             }
-
             leadRepository.saveAll(newLeads);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
+    public List<Lead> checkIfLeadsExists(List<Lead> leads,String userId,List<Lead> existingLeads){
+
+        Map<String, String> existingLeadsMap = existingLeads.stream()
+                .collect(Collectors.toMap(Lead::getEmail, Lead::getUserId, (existing, replacement) -> existing));
+
+        return leads.stream()
+                .filter(lead -> !existingLeadsMap.containsKey(lead.getEmail()) ||
+                        !existingLeadsMap.get(lead.getEmail()).equals(userId))
+                .toList();
+    }
+
     @Transactional
     public ResponseEntity<?> emailFinder(EmailFinderRequest request) {
         try {

@@ -3,6 +3,8 @@ package integrations.telex.salesagent.user.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import integrations.telex.salesagent.lead.model.Lead;
+import integrations.telex.salesagent.lead.service.LeadResearchService;
 import integrations.telex.salesagent.lead.service.LeadService;
 import integrations.telex.salesagent.telex.service.TelexClient;
 import integrations.telex.salesagent.user.model.ColdEmail;
@@ -63,8 +65,8 @@ public class ChatService {
                 userResponses.add("/start");
                 String instruction = """
                         Welcome!\s
-                        Please provide your business email address.\s
-                        e.g. test@example.com""";
+                        Please provide the domain you will like to query for leads.\s
+                        e.g. stripe.com""";
                 telexClient.sendInstruction(channelId, instruction);
             } else {
                 log.info(isSaleAgentCalled(message).toString());
@@ -73,54 +75,6 @@ public class ChatService {
         }
 
         if (userResponses.size() == 1) {
-            if (message.equalsIgnoreCase("/exit")) {
-                exitProcess(channelId);
-                return;
-            }
-            String email = message.trim();
-
-            if (!isValidEmail(email)) {
-                String instruction = """
-                        Invalid Email Address. Please provide a valid email address.\s
-                        e.g. test@example.com
-                        """;
-                telexClient.failedInstruction(channelId, instruction);
-                return;
-            }
-            if (userRepository.findByEmail(email).isPresent()) {
-                String instruction = "Email already exists. Please provide a different email address.";
-                telexClient.failedInstruction(channelId, instruction);
-                return;
-            }
-            userResponses.add(email);
-            String instruction = """
-                    Please provide the platform you're looking for leads from.\s
-                    e.g. linkedin
-                    """;
-            telexClient.sendInstruction(channelId, instruction);
-            return;
-        }
-
-        if (userResponses.size() == 2) {
-            if (message.equalsIgnoreCase("/exit")) {
-                exitProcess(channelId);
-                return;
-            }
-            if (message.isEmpty()) {
-                String instruction = "Please provide the platform you're looking for leads from. e.g. linkedin";
-                telexClient.failedInstruction(channelId, instruction);
-                return;
-            }
-            String extractedCompany = message.trim();
-            userResponses.add(extractedCompany);
-            String instruction = "What are you looking for?\n" +
-                    "Enter the domain you would like to search for leads\n" +
-                    "e.g. linkedin.com";
-            telexClient.sendInstruction(channelId, instruction);
-            return;
-        }
-
-        if (userResponses.size() == 3) {
             if (message.equalsIgnoreCase("/exit")) {
                 exitProcess(channelId);
                 return;
@@ -145,9 +99,11 @@ public class ChatService {
             return;
         }
 
-        if (userResponses.size() == 4) {
+        if (userResponses.size() == 2) {
             if (message.equalsIgnoreCase("no")) {
                 exitProcess(channelId);
+                channelResponses.remove(channelId);
+                callDomainSearchEndpoint(channelId);
                 return;
             } else if (message.equalsIgnoreCase("yes")) {
                 userResponses.add("yes");
@@ -161,7 +117,8 @@ public class ChatService {
             return;
         }
 
-        if (userResponses.size() == 5){
+
+        if (userResponses.size() == 3){
             if (message.equalsIgnoreCase("/exit")) {
                 exitProcess(channelId);
                 return;
@@ -180,7 +137,7 @@ public class ChatService {
             return;
         }
 
-        if (userResponses.size() == 6){
+        if (userResponses.size() == 4){
             if (message.equalsIgnoreCase("/exit")) {
                 exitProcess(channelId);
                 return;
@@ -202,7 +159,7 @@ public class ChatService {
             return;
         }
 
-        if (userResponses.size() == 7){
+        if (userResponses.size() == 5){
             if (message.equalsIgnoreCase("/exit")) {
                 exitProcess(channelId);
                 return;
@@ -217,14 +174,42 @@ public class ChatService {
             }
             userResponses.add(message);
             String instruction = """
-                    Enter your jobTitle for email personalization\s
+                    Enter your company for email personalization\s
                     e.g. Software Engineer
                     """;
             telexClient.sendInstruction(channelId, instruction);
             return;
         }
+//        if (userResponses.size() == 1) {
+//            if (message.equalsIgnoreCase("/exit")) {
+//                exitProcess(channelId);
+//                return;
+//            }
+//            String email = message.trim();
+//
+//            if (!isValidEmail(email)) {
+//                String instruction = """
+//                        Invalid Email Address. Please provide a valid email address.\s
+//                        e.g. test@example.com
+//                        """;
+//                telexClient.failedInstruction(channelId, instruction);
+//                return;
+//            }
+//            if (userRepository.findByEmail(email).isPresent()) {
+//                String instruction = "Email already exists. Please provide a different email address.";
+//                telexClient.failedInstruction(channelId, instruction);
+//                return;
+//            }
+//            userResponses.add(email);
+//            String instruction = """
+//                    Please provide the platform you're looking for leads from.\s
+//                    e.g. linkedin
+//                    """;
+//            telexClient.sendInstruction(channelId, instruction);
+//            return;
+//        }
 
-        if (userResponses.size() == 8){
+        if (userResponses.size() == 6){
             if (message.equalsIgnoreCase("/exit")) {
                 exitProcess(channelId);
                 return;
@@ -310,10 +295,10 @@ public class ChatService {
 
     private void saveColdEmailResponses(List<String> responses, String userId, String channelId) {
         ColdEmail coldEmail = new ColdEmail();
-        coldEmail.setName(responses.get(5));
-        coldEmail.setProductName(responses.get(6));
-        coldEmail.setCompanyName(responses.get(7));
-        coldEmail.setJobTitle(responses.get(8));
+        coldEmail.setName(responses.get(4));
+        coldEmail.setProductName(responses.get(5));
+        coldEmail.setCompanyName(responses.get(6));
+        coldEmail.setJobTitle(responses.get(7));
         coldEmail.setUserId(userId);
         coldEmail.setChannelId(channelId);
         coldEmailRepository.save(coldEmail);
@@ -328,12 +313,11 @@ public class ChatService {
         String request = String.format("Carefully analyze the following text and determine whether it relates to lead" +
                 " generation by a sales agent. Look for explicit indicators such as references to prospecting, identifying potential customers, outreach efforts, nurturing leads, sales pitches," +
                 " or follow-up strategies designed to convert prospects into clients. Provide a clear 'true' or 'false' only as a single response," +
-                "i emphasize that it must be a single word response!be  extremely concise"+
+                "i emphasize that it must be a single word response! be extremely concise"+
                 "the text is '%s'",message);
         String response = chatModel.call(request).toLowerCase();
         return response.contains("true");
     }
-
 
     private void exitProcess(String channelId) throws JsonProcessingException {
         channelResponses.remove(channelId);
