@@ -142,9 +142,9 @@ public class LeadService {
 
            //Optional<ColdEmail> coldEmail = coldEmailRepository.findByChannelId(channelId);
 
-            for (Lead lead : newLeads) {
-                telexClient.processTelexPayload(channelId, lead);
-            }
+//            for (Lead lead : newLeads) {
+//                telexClient.processTelexPayload(channelId, lead);
+//            }
             leadRepository.saveAll(newLeads);
             return newLeads;
         } catch (IOException e) {
