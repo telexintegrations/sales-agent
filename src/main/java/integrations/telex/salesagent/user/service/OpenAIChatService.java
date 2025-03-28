@@ -223,9 +223,9 @@ public class OpenAIChatService {
 
     private CompanySize convertToCompanySize(String sizeString) {
         return switch (sizeString.toLowerCase()) {
-            case "small" -> CompanySize.C;
-            case "mid-sized", "medium" -> CompanySize.B;
-            case "large" -> CompanySize.A;
+            case "small" -> CompanySize.B;
+            case "mid-sized", "medium" -> CompanySize.D;
+            case "large" -> CompanySize.I;
             default -> null;
         };
     }

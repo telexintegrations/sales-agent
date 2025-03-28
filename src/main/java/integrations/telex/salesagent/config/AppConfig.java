@@ -1,5 +1,6 @@
 package integrations.telex.salesagent.config;
 
+import integrations.telex.salesagent.user.service.OpenAIService;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
