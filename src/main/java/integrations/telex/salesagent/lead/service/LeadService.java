@@ -68,7 +68,7 @@ public class LeadService {
         return leadRepository.findAll(pageable);
     }
 
-    public List<Lead> findAllLeads(Pageable pageable) {
+    public List<Lead> findAllLeads() {
         return leadRepository.findAll();
     }
 
@@ -94,7 +94,7 @@ public class LeadService {
             return ResponseEntity.internalServerError().body(error.getMessage());
         }
     }
-    public void domainSearch(String channelId) {
+    public List<Lead> domainSearch(String channelId) {
         try {
             log.info("called domain search");
             Optional<User> userOptional = userRepository.findByChannelId(channelId);
@@ -102,11 +102,11 @@ public class LeadService {
             if (userOptional.isEmpty()) {
                 String message = "User not found. Please provide a valid user.";
                 telexClient.failedInstruction(channelId, message);
-                return;
+                return null;
             }
 
             User user = userOptional.get();
-            String domain = user.getLeadType();
+            String domain = user.getDomain();
             String userId = user.getId();
 
             String key = okHttpConfig.hunterParams().getApikey();
@@ -140,18 +140,18 @@ public class LeadService {
             List<Lead> existingLeads = leadRepository.findAll();
             List<Lead> newLeads = checkIfLeadsExists(leads,channelId,existingLeads);
 
-           Optional<ColdEmail> coldEmail = coldEmailRepository.findByChannelId(channelId);
+           //Optional<ColdEmail> coldEmail = coldEmailRepository.findByChannelId(channelId);
 
             for (Lead lead : newLeads) {
                 telexClient.processTelexPayload(channelId, lead);
-                leadResearchService.fetchLeadReport(lead,channelId);
-                coldEmail.ifPresent(email -> coldEmailService.generateColdEmails(email, lead));
             }
             leadRepository.saveAll(newLeads);
+            return newLeads;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
 
     public List<Lead> checkIfLeadsExists(List<Lead> leads,String userId,List<Lead> existingLeads){
 

@@ -33,7 +33,9 @@ public class ChatService {
     private final ObjectMapper objectMapper;
     private final LeadService leadService;
     private final ChatModel chatModel;
+    private final LeadResearchService leadResearchService;
     private final ColdEmailRepository coldEmailRepository;
+    private final ColdEmailService coldEmailService;
 
     private final Map<String, List<String>> channelResponses = new ConcurrentHashMap<>();
 
@@ -81,7 +83,7 @@ public class ChatService {
             }
             String domain = message.trim();
 
-            if (!isValidDomain(domain)) {
+            if (domain.isEmpty()) {
                 String instruction = "Invalid Domain Name. Please provide a valid domain.";
                 telexClient.failedInstruction(channelId, instruction);
                 return;
@@ -91,94 +93,30 @@ public class ChatService {
 
             String instruction = "Your search criteria have been saved. We will notify you when we find leads matching your criteria.";
             telexClient.sendInstruction(channelId, instruction);
+            channelResponses.remove(channelId);
+            callDomainSearchEndpoint(channelId);
 
-            instruction = "Would you like to draft cold emails for this leads? \n" +
+            instruction = "Would you like to perform additional research on these leads? \n" +
                     "Yes or no";
-
             telexClient.sendInstruction(channelId, instruction);
             return;
         }
 
-        if (userResponses.size() == 2) {
-            if (message.equalsIgnoreCase("no")) {
-                exitProcess(channelId);
-                channelResponses.remove(channelId);
-                callDomainSearchEndpoint(channelId);
-                return;
-            } else if (message.equalsIgnoreCase("yes")) {
-                userResponses.add("yes");
-                String instruction = """
-                        Enter your name for email personalization\s
-                        e.g. John Doe
+        if(userResponses.size() == 2){
+             if (message.equalsIgnoreCase("no")) {
+                userResponses.add("no");
+                 String instruction = """
+                        Would you like to draft cold emails for these leads?
+                        yes or no?
                         """;
-                telexClient.sendInstruction(channelId, instruction);
+                 telexClient.sendInstruction(channelId, instruction);
+                coldEmailFlow(userResponses,message,channelId);
+                return;
+            }else if (message.equalsIgnoreCase("yes")) {
+                List<Lead> leads = leadService.domainSearch(channelId);
+                deepResearchFlow(channelId,leads,userResponses,message);
                 return;
             }
-            return;
-        }
-
-
-        if (userResponses.size() == 3){
-            if (message.equalsIgnoreCase("/exit")) {
-                exitProcess(channelId);
-                return;
-            }
-            if (message.isEmpty()) {
-                String instruction = "Please provide your name for email personalization";
-                telexClient.failedInstruction(channelId, instruction);
-                return;
-            }
-            userResponses.add(message.trim());
-            String instruction = """
-                    Enter your product name for email personalization\s
-                    e.g. communication
-                    """;
-            telexClient.sendInstruction(channelId, instruction);
-            return;
-        }
-
-        if (userResponses.size() == 4){
-            if (message.equalsIgnoreCase("/exit")) {
-                exitProcess(channelId);
-                return;
-            }
-            if (message.isEmpty()) {
-                String instruction = """
-                    Enter your product name for email personalization\s
-                    e.g. communication
-                    """;
-                telexClient.failedInstruction(channelId, instruction);
-                return;
-            }
-            userResponses.add(message);
-            String instruction = """
-                    Enter the name of your company for email personalization\s
-                    e.g. Telex
-                    """;
-            telexClient.sendInstruction(channelId, instruction);
-            return;
-        }
-
-        if (userResponses.size() == 5){
-            if (message.equalsIgnoreCase("/exit")) {
-                exitProcess(channelId);
-                return;
-            }
-            if (message.isEmpty()) {
-                String instruction = """
-                    Enter the name of your company for email personalization\s
-                    e.g. Telex
-                    """;
-                telexClient.failedInstruction(channelId, instruction);
-                return;
-            }
-            userResponses.add(message);
-            String instruction = """
-                    Enter your company for email personalization\s
-                    e.g. Software Engineer
-                    """;
-            telexClient.sendInstruction(channelId, instruction);
-            return;
         }
 //        if (userResponses.size() == 1) {
 //            if (message.equalsIgnoreCase("/exit")) {
@@ -208,8 +146,91 @@ public class ChatService {
 //            telexClient.sendInstruction(channelId, instruction);
 //            return;
 //        }
+    }
+
+    private void coldEmailFlow(List<String> userResponses, String message,String channelId) throws JsonProcessingException {
+
+        if (userResponses.size() == 3) {
+            if (message.equalsIgnoreCase("no")) {
+                exitProcess(channelId);
+                return;
+            } else if (message.equalsIgnoreCase("yes")) {
+                userResponses.add("yes");
+                String instruction = """
+                        Enter your name for email personalization\s
+                        e.g. John Doe
+                        """;
+                telexClient.sendInstruction(channelId, instruction);
+                return;
+            }
+            return;
+        }
+
+        if (userResponses.size() == 4){
+            if (message.equalsIgnoreCase("/exit")) {
+                exitProcess(channelId);
+                return;
+            }
+            if (message.isEmpty()) {
+                String instruction = "Please provide your name for email personalization";
+                telexClient.failedInstruction(channelId, instruction);
+                return;
+            }
+            userResponses.add(message.trim());
+            String instruction = """
+                    Enter your product name for email personalization\s
+                    e.g. communication
+                    """;
+            telexClient.sendInstruction(channelId, instruction);
+            return;
+        }
+
+        if (userResponses.size() == 5){
+            if (message.equalsIgnoreCase("/exit")) {
+                exitProcess(channelId);
+                return;
+            }
+            if (message.isEmpty()) {
+                String instruction = """
+                    Enter your product name for email personalization\s
+                    e.g. communication
+                    """;
+                telexClient.failedInstruction(channelId, instruction);
+                return;
+            }
+            userResponses.add(message);
+            String instruction = """
+                    Enter the name of your company for email personalization\s
+                    e.g. Telex
+                    """;
+            telexClient.sendInstruction(channelId, instruction);
+            return;
+        }
 
         if (userResponses.size() == 6){
+            if (message.equalsIgnoreCase("/exit")) {
+                exitProcess(channelId);
+                return;
+            }
+            if (message.isEmpty()) {
+                String instruction = """
+                    Enter the name of your company for email personalization\s
+                    e.g. Telex
+                    """;
+                telexClient.failedInstruction(channelId, instruction);
+                return;
+            }
+            userResponses.add(message);
+            String instruction = """
+                    Enter your company for email personalization\s
+                    e.g. Software Engineer
+                    """;
+            telexClient.sendInstruction(channelId, instruction);
+            return;
+        }
+
+
+        if (userResponses.size() == 7){
             if (message.equalsIgnoreCase("/exit")) {
                 exitProcess(channelId);
                 return;
@@ -238,9 +259,26 @@ public class ChatService {
             String userId = user.getId();
 
             saveColdEmailResponses(userResponses, userId, channelId);
+            List<Lead> leads = leadService.domainSearch(channelId);
 
             channelResponses.remove(channelId);
-            callDomainSearchEndpoint(channelId);
+            getColdEmails(channelId,leads);
+        }
+    }
+
+    private void deepResearchFlow(String channelId, List<Lead> leads,List<String> userResponses, String message) throws JsonProcessingException {
+        getLeadResearch(channelId,leads);
+        String instruction = """
+                        Would you like to draft cold emails for these leads?
+                        yes or no?
+                        """;
+        telexClient.sendInstruction(channelId, instruction);
+        if(message.equalsIgnoreCase("no")) {
+            exitProcess(channelId);
+            return;
+        }else if(message.equalsIgnoreCase("yes")){
+            coldEmailFlow(userResponses, message, channelId);
+            return;
         }
     }
 
@@ -283,12 +321,22 @@ public class ChatService {
         return response.contains("true");
     }
 
+    private void getLeadResearch(String channelId, List<Lead> leads) throws JsonProcessingException {
+        for (Lead lead: leads) {
+            leadResearchService.fetchLeadReport(lead,channelId);
+        }
+    }
+
+    private void getColdEmails(String channelId, List<Lead> leads){
+        Optional<ColdEmail> coldEmail = coldEmailRepository.findByChannelId(channelId);
+        for (Lead lead: leads) {
+            coldEmail.ifPresent(email -> coldEmailService.generateColdEmails(email,lead));
+        }
+    }
 
     private void saveUser(List<String> responses, String channelId) {
         User user = new User();
-        user.setEmail(responses.get(1));
-        user.setCompanyName(responses.get(2));
-        user.setLeadType(responses.get(3));
+        user.setDomain(responses.get(1));
         user.setChannelId(channelId);
         userRepository.save(user);
     }
