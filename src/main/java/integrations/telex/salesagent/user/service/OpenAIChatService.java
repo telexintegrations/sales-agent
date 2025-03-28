@@ -212,10 +212,11 @@ public class OpenAIChatService {
 
     private Integer convertLocationToId(String locationName) {
         Map<String, Integer> locationMap = Map.of(
-                "Lagos", 1,
-                "New York", 2,
-                "Berlin", 3
-                // Add more mappings as needed
+                "Lagos", 111964948,
+                "US", 103644278,
+                "London Area, United Kingdom", 90009496,
+                "Nairobi", 101339379,
+                "Kenya", 100710459
         );
         return locationMap.getOrDefault(locationName, null);
     }
