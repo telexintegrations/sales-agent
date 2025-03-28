@@ -3,6 +3,7 @@ package integrations.telex.salesagent.user.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import integrations.telex.salesagent.telex.service.TelexService;
 import integrations.telex.salesagent.user.service.ChatService;
+import integrations.telex.salesagent.user.service.OpenAIChatService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,8 @@ import java.util.Map;
 @Valid
 @Slf4j
 public class ChatController {
-    private final ChatService chatService;
+    //private final ChatService chatService;
+    private final OpenAIChatService openAIChatService;
     private final TelexService telexService;
 
     @GetMapping("/integration.json")
@@ -34,8 +36,8 @@ public class ChatController {
 
     @PostMapping("/webhook")
     public void salesAgentChat(@RequestBody String payload) throws JsonProcessingException {
-        log.info("Telex Payload , {}", payload);
-        chatService.processMessage(payload);
+        //chatService.processMessage(payload);
+        openAIChatService.processMessage(payload);
     }
 
 }

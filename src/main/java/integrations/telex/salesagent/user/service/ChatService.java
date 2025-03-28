@@ -40,7 +40,6 @@ public class ChatService {
     private final Map<String, List<String>> channelResponses = new ConcurrentHashMap<>();
 
     public void processMessage(String payload) throws JsonProcessingException {
-        log.info("Telex Payload in the service class , {}", payload);
         JsonNode jsonNode = objectMapper.readTree(payload);
         String htmlMessage = jsonNode.get("message").asText();
         String message = requestFormatter.stripHtml(htmlMessage);
