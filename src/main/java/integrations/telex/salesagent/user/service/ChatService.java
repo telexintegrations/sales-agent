@@ -96,28 +96,28 @@ public class ChatService {
             channelResponses.remove(channelId);
             callDomainSearchEndpoint(channelId);
 
-            instruction = "Would you like to perform additional research on these leads? \n" +
-                    "Yes or no";
-            telexClient.sendInstruction(channelId, instruction);
-            return;
+//            instruction = "Would you like to perform additional research on these leads? \n" +
+//                    "Yes or no";
+//            telexClient.sendInstruction(channelId, instruction);
+//            return;
         }
 
-        if(userResponses.size() == 2){
-             if (message.equalsIgnoreCase("no")) {
-                userResponses.add("no");
-                 String instruction = """
-                        Would you like to draft cold emails for these leads?
-                        yes or no?
-                        """;
-                 telexClient.sendInstruction(channelId, instruction);
-                coldEmailFlow(userResponses,message,channelId);
-                return;
-            }else if (message.equalsIgnoreCase("yes")) {
-                List<Lead> leads = leadService.domainSearch(channelId);
-                deepResearchFlow(channelId,leads,userResponses,message);
-                return;
-            }
-        }
+//        if(userResponses.size() == 2){
+//             if (message.equalsIgnoreCase("no")) {
+//                userResponses.add("no");
+//                 String instruction = """
+//                        Would you like to draft cold emails for these leads?
+//                        yes or no?
+//                        """;
+//                 telexClient.sendInstruction(channelId, instruction);
+//                coldEmailFlow(userResponses,message,channelId);
+//                return;
+//            }else if (message.equalsIgnoreCase("yes")) {
+//                List<Lead> leads = leadService.domainSearch(channelId);
+//                deepResearchFlow(channelId,leads,userResponses,message);
+//                return;
+//            }
+//        }
 //        if (userResponses.size() == 1) {
 //            if (message.equalsIgnoreCase("/exit")) {
 //                exitProcess(channelId);
@@ -321,12 +321,12 @@ public class ChatService {
         return response.contains("true");
     }
 
+
     private void getLeadResearch(String channelId, List<Lead> leads) throws JsonProcessingException {
         for (Lead lead: leads) {
             leadResearchService.fetchLeadReport(lead,channelId);
         }
     }
-
     private void getColdEmails(String channelId, List<Lead> leads){
         Optional<ColdEmail> coldEmail = coldEmailRepository.findByChannelId(channelId);
         for (Lead lead: leads) {
