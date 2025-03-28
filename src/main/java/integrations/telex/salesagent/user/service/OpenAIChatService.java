@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import integrations.telex.salesagent.lead.dto.CompanySearchRequest;
+import integrations.telex.salesagent.lead.enums.CompanySize;
+import integrations.telex.salesagent.lead.service.RapidLeadResearch;
 import integrations.telex.salesagent.telex.service.TelexClient;
 import integrations.telex.salesagent.user.dto.request.LeadDetails;
 import integrations.telex.salesagent.user.utils.RequestFormatter;
@@ -11,9 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -25,6 +26,7 @@ public class OpenAIChatService {
     private final Map<String, List<String>> channelResponses = new ConcurrentHashMap<>();
     private final ObjectMapper objectMapper;
     private final RequestFormatter requestFormatter;
+    private final RapidLeadResearch rapidLeadResearch;
 
     private enum ConversationState {
         INITIAL,
@@ -85,6 +87,8 @@ public class OpenAIChatService {
 
             generateAndSendResearch(channelId, details);
 
+            CompanySearchRequest searchRequest = convertToCompanySearchRequest(details);
+            rapidLeadResearch.queryLeads(channelId, searchRequest);
         } catch (Exception e) {
             log.error("Error processing domain input", e);
             telexClient.failedInstruction(channelId, "Something went wrong. Please try again.");
@@ -175,6 +179,54 @@ public class OpenAIChatService {
         if (companySize.contains("mid")) return "B";
         if (companySize.contains("large")) return "A";
         return "C"; // default to small
+    }
+
+    private CompanySearchRequest convertToCompanySearchRequest(LeadDetails details) {
+        CompanySearchRequest request = new CompanySearchRequest();
+
+        // Set keyword from businessType
+        request.setKeyword(details.getBusinessType());
+
+        // Parse locations (assuming comma-separated string like "Lagos,New York")
+        if (details.getLocations() != null && !details.getLocations().isEmpty()) {
+            List<Integer> locationIds = Arrays.stream(details.getLocations().split(","))
+                    .map(String::trim)
+                    .map(this::convertLocationToId) // You'll need to implement this
+                    .filter(Objects::nonNull)
+                    .toList();
+            request.setLocations(locationIds);
+        }
+
+        // Convert company sizes
+        if (details.getCompanySizes() != null && !details.getCompanySizes().isEmpty()) {
+            List<CompanySize> companySizes = Arrays.stream(details.getCompanySizes().split(","))
+                    .map(String::trim)
+                    .map(this::convertToCompanySize)
+                    .filter(Objects::nonNull)
+                    .toList();
+            request.setCompanySizes(companySizes);
+        }
+
+        return request;
+    }
+
+    private Integer convertLocationToId(String locationName) {
+        Map<String, Integer> locationMap = Map.of(
+                "Lagos", 1,
+                "New York", 2,
+                "Berlin", 3
+                // Add more mappings as needed
+        );
+        return locationMap.getOrDefault(locationName, null);
+    }
+
+    private CompanySize convertToCompanySize(String sizeString) {
+        return switch (sizeString.toLowerCase()) {
+            case "small" -> CompanySize.C;
+            case "mid-sized", "medium" -> CompanySize.B;
+            case "large" -> CompanySize.A;
+            default -> null;
+        };
     }
 }
 
