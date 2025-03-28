@@ -3,6 +3,7 @@ package integrations.telex.salesagent.telex.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import integrations.telex.salesagent.config.AppConfig;
+import integrations.telex.salesagent.lead.dto.RapidLeadDto;
 import integrations.telex.salesagent.lead.model.Lead;
 import integrations.telex.salesagent.telex.util.FormatTelexMessage;
 import integrations.telex.salesagent.user.dto.request.TelexPayload;
@@ -31,7 +32,7 @@ public class TelexClient {
         }
     }
 
-    public void processTelexPayload(String channelID, Lead lead) throws JsonProcessingException {
+    public void processTelexPayload(String channelID, RapidLeadDto lead) throws JsonProcessingException {
         String message = formatTelexMessage.formatNewLeadMessage(lead) + "\n\nSales Agent Bot";
 
         TelexPayload telexPayload = new TelexPayload("New Lead Alert", "Sales Agent", "success", message);

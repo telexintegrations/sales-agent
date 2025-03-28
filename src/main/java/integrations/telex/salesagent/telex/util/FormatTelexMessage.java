@@ -1,28 +1,26 @@
 package integrations.telex.salesagent.telex.util;
 
-import integrations.telex.salesagent.lead.model.Lead;
+import integrations.telex.salesagent.lead.dto.RapidLeadDto;
 import org.springframework.stereotype.Component;
 
 @Component
 public class FormatTelexMessage {
+
     private static final String NEW_LEAD = """
-            New lead has been found:
-            Name: %s
-            Company: %s
-            Industry: %s
-            Email: %s
-            LinkedIn URL: %s
-            """;
+        New lead has been found:
 
-    public String formatNewLeadMessage(Lead data) {
+        Lead ID :  %s
+        Lead Name:  %s
+        Lead Linkedin URL :  %s
+        Lead Company Summary :  %s
+        """;
 
+    public String formatNewLeadMessage(RapidLeadDto data) {
         return String.format(NEW_LEAD,
+                data.getId(),
                 data.getName(),
-                data.getCompany(),
-                data.getIndustry(),
-                data.getEmail(),
-                data.getLinkedInUrl()
-                );
-
+                data.getLinkedinUrl(),
+                data.getTagline()
+        );
     }
 }
