@@ -25,7 +25,7 @@ public class User {
     @Indexed(unique = true)
     private String email;
 
-    private String leadType;
+    private String domain;
 
     private String channelId;
 
