@@ -36,7 +36,7 @@ public class RapidLeadResearch {
     private final ObjectMapper objectMapper;
     private final TelexClient telexClient;
 
-    public List<RapidLeadDto> queryLeads(CompanySearchRequest request) {
+    public List<RapidLeadDto> queryLeads(String channelID,CompanySearchRequest request) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.set("X-RapidAPI-Key", rapidApiKey);
@@ -58,7 +58,7 @@ public class RapidLeadResearch {
 
                 // Forward each lead to Telex
                 for (RapidLeadDto lead : newLeads) {
-                    telexClient.processTelexPayload("0195d8c2-279b-76f8-bbb6-8d6fe1021743", lead);
+                    telexClient.processTelexPayload(channelID, lead);
                     log.info("Lead sent to Telex: {}", lead.getName());
                 }
             } else {
