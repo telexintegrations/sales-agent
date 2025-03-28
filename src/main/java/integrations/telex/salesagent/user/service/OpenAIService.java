@@ -18,9 +18,9 @@ public class OpenAIService {
     @Value("${openai.api-key}")
     private String openaiApiKey;
 
-    public OpenAIService() {
-        this.openAiService = new OpenAiService(openaiApiKey, Duration.ofSeconds(30));
-    }
+//    public OpenAIService() {
+//        this.openAiService = new OpenAiService(openaiApiKey, Duration.ofSeconds(30));
+//    }
 
     public String getResponse(String prompt) {
         ChatCompletionRequest request = ChatCompletionRequest.builder()
