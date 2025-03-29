@@ -18,7 +18,12 @@ import java.util.Collections;
 @Service
 @RequiredArgsConstructor
 public class OpenAIService {
-    private final AppConfig appConfig;
+    @Value("${openai.api.url}")
+    private String openAiApiUrl;
+
+    @Value("${openai.api-key}")
+    private String openaiApiKey;
+
     private final RestTemplate restTemplate;
 //    private final OpenAiService openAiService;
 
@@ -43,7 +48,7 @@ public class OpenAIService {
     public String getResponse(String prompt) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + appConfig.getOpenaiApiKey());
+        headers.set("Authorization", "Bearer " + openaiApiKey);
 
         String requestBody = "{\n" +
                 "  \"model\": \"gpt-3.5-turbo\",\n" +
@@ -68,7 +73,7 @@ public class OpenAIService {
 //        }
 
         HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-        String response = restTemplate.postForObject(appConfig.getOpenAiApiUrl(), entity, String.class);
+        String response = restTemplate.postForObject(openAiApiUrl, entity, String.class);
         if (response != null) {
             // Parse the response to extract the generated text
             // This is a simplified example; you may want to use a JSON library for more complex parsing
