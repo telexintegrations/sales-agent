@@ -13,5 +13,4 @@ public class LeadDetails {
     private String businessType;
     private String locations;
     private String companySizes;
-    private String companySizeClass; // A, B, or C
 }
