@@ -65,10 +65,16 @@ public class OpenAIChatService {
     private void handleInitialState(String channelId, String message) throws JsonProcessingException {
         if (isSaleAgentCalled(message)) {
             conversationStates.put(channelId, ConversationState.AWAITING_DETAILS);
-            String prompt = """
-                    Understood. To ensure accurate research, could you confirm your business type and the specific location you're targeting, along with any particular industry or company size criteria?
-                    """;
-            telexClient.sendInstruction(channelId, prompt);
+            String prompt = String.format("""
+                    A user has sent the following message: %s Please draft a professional and engaging response that:
+                    Acknowledges the user's request.
+                    Asks relevant questions to better understand their business (e.g., business type, specific location, particular industry or company size).
+                    Maintains a friendly, helpful, and professional tone.""", message);
+//            String prompt = """
+//                    Understood. To ensure accurate research, could you confirm your business type and the specific location you're targeting, along with any particular industry or company size criteria?
+//                    """;
+            String response = openAIService.getResponse(prompt);
+            telexClient.sendInstruction(channelId, response);
         }
     }
 
