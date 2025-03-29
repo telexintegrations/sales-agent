@@ -31,6 +31,9 @@ public class AppConfig {
     @Value("${google.search.engine.id}")
     private String googleSearchEngineId;
 
+    @Value("${openai.api.url}")
+    private String openAiApiUrl;
+
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
