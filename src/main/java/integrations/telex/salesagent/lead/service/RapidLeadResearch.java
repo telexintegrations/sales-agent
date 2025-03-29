@@ -56,6 +56,17 @@ public class RapidLeadResearch {
                 // Format response to List<LeadDTO>
                 List<RapidLeadDto> newLeads = formatLeadsResponse(response.getBody());
 
+                //return error if no profile is found
+                if (newLeads.isEmpty()){
+                    StringBuilder report = new StringBuilder();
+                    report.append("RapidApi company Research Report for ").append(request.getKeyword()).append(" on linkedIn.").append("\n")
+                            .append("__________________________________________\n\n")
+                            .append("---- no linkedIn profiles could be found ----\n\n")
+                            .append(" Please be specific with the type of companies you would like to research on! ");
+                    telexClient.sendInstruction(channelID, report.toString());
+                    log.info("message sent to Telex: {}", report);
+                }
+
                 // Forward each lead to Telex
                 for (RapidLeadDto lead : newLeads) {
                     telexClient.processTelexPayload(channelID, lead);
@@ -87,6 +98,8 @@ public class RapidLeadResearch {
 
                     leads.add(new RapidLeadDto(id, name, linkedinUrl, companyDesc));
                 }
+            }else{
+                return leads;
             }
         } catch (Exception e) {
             log.error("Error parsing API response: {}", e.getMessage(), e);
