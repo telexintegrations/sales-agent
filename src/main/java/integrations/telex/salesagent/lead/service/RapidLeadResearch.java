@@ -59,7 +59,7 @@ public class RapidLeadResearch {
                 //return error if no profile is found
                 if (newLeads.isEmpty()){
                     StringBuilder report = new StringBuilder();
-                    report.append("RapidApi company Research Report for ").append(request.getKeyword()).append(" on linkedIn.").append("\n")
+                    report.append("RapidApi company Research Report for ").append(request.getKeyword()).append(" linkedIn.").append("\n")
                             .append("__________________________________________\n\n")
                             .append("---- no linkedIn profiles could be found ----\n\n")
                             .append(" Please be specific with the type of companies you would like to research on! ");

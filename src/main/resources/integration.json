@@ -23,6 +23,7 @@
     "settings": [
     ],
     "target_url": "https://sales-agent-3wyf.onrender.com/webhook",
-    "tick_url": "https://sales-agent-3wyf.onrender.com/tick"
+    "tick_url": "https://sales-agent-3wyf.onrender.com/tick",
+    "bot": true
   }
 }
