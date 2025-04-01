@@ -92,6 +92,11 @@ public class OpenAIChatService {
             log.info("Lead Details: {}", details);
             leadDetailsMap.put(channelId, details);
 
+            if (details.getLocations() == null || details.getBusinessType() == null) {
+                restartConversation(channelId);
+                return;
+            }
+
             String sizeCode = classifyCompanySize(details.getCompanySizes());
 
             log.info("Company size code: {}", sizeCode);
