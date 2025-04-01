@@ -111,6 +111,8 @@ public class OpenAIChatService {
 
             generateAndSendResearch(channelId, details);
 
+            exitProcess(channelId);
+
         } catch (Exception e) {
             log.error("Error processing domain input", e);
             telexClient.failedInstruction(channelId, "Something went wrong. Please try again.");
@@ -119,19 +121,22 @@ public class OpenAIChatService {
 
     private LeadDetails extractLeadDetails(String userInput) throws JsonProcessingException {
         String prompt = String.format("""
-            Extract the following details from this business lead request:
+            Extract structured data from this lead request:
             "%s"
-            
-            Return JSON with these keys:
-            - "businessType": type of business (note -> return it in singular form)
-            - "locations": target location(s)
-            - "companySizes": specified company sizes (small, mid-sized, large)
-            
-            For missing fields, use empty strings.
+    
+            Rules:
+            1. "businessType": Singular form (e.g., "tech startup" → "tech startup").
+            2. "locations": Comma-separated if multiple (e.g., "Berlin, Munich").
+            3. "companySizes": Standardize to "small", "mid-sized", or "large".
+    
+            Return ONLY valid JSON. Example:
+            {"businessType": "law firm", "locations": "London", "companySizes": "mid-sized"}
             """, userInput);
 
         String response = chatModel.call(prompt);
-        return objectMapper.readValue(response, LeadDetails.class);
+        LeadDetails extractedJSON = objectMapper.readValue(response, LeadDetails.class);
+        log.info("Extracted Object {}", extractedJSON);
+        return extractedJSON;
     }
 
     private void generateAndSendResearch(String channelId, LeadDetails details) throws JsonProcessingException {
@@ -224,14 +229,22 @@ public class OpenAIChatService {
     private void exitProcess(String channelId) throws JsonProcessingException {
         conversationStates.remove(channelId);
         leadDetailsMap.remove(channelId);
-        telexClient.sendInstruction(channelId, "Goodbye! Let me know if you need help with lead generation in the future.");
+        String instruction = """
+                That concludes the leads process.
+                Let me know if you need help with lead generation in the future.
+                """;
+        telexClient.sendInstruction(channelId, instruction);
     }
 
     private void restartConversation(String channelId) throws JsonProcessingException {
         conversationStates.put(channelId, ConversationState.INITIAL);
         leadDetailsMap.remove(channelId);
-        telexClient.sendInstruction(channelId, "What would you like to do? You can say something like: " +
-                "\"I need help generating leads for my digital marketing agency targeting tech startups in Abuja\"");
+        String instruction = """
+                What would you like to do?
+                You can say something like:"
+                I need help generating leads for my digital marketing agency targeting tech startups in Abuja.
+                """;
+        telexClient.sendInstruction(channelId, instruction);
     }
 
     private boolean isRestartRequest(String message) {
