@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import integrations.telex.salesagent.lead.dto.CompanySearchRequest;
+import integrations.telex.salesagent.lead.dto.RapidLeadDto;
 import integrations.telex.salesagent.lead.enums.CompanySize;
 import integrations.telex.salesagent.lead.service.RapidLeadResearch;
 import integrations.telex.salesagent.telex.service.TelexClient;
@@ -104,12 +105,21 @@ public class OpenAIChatService {
 
             CompanySearchRequest searchRequest = convertToCompanySearchRequest(details);
             rapidLeadResearch.queryLeads(channelId, searchRequest);
+            List<RapidLeadDto> leads = rapidLeadResearch.queryLeads(channelId,searchRequest);
+            if (!leads.isEmpty()) {
+                String prompt2 = String.format("I have found %d leads! \nI would now generate pitches for them!",leads.size());
+                telexClient.sendInstruction(channelId, prompt2);
+                List<String> pitches = generatePitches(details,leads);
+                for (String pitch: pitches) {
+                    telexClient.sendInstruction(channelId," Here is a pitch for you \n" + pitch);
+                }
+            }
 
-            String prompt2 = "I'll now conduct research on " +
-                    details.getCompanySizes() + " companies in " + details.getLocations() +
+            String prompt3 = "I'll now conduct researches on "
+                    +details.getCompanySizes() + " "+ details.getBusinessType() + " companies in " + details.getLocations() +
                     " to compile a list of potential leads. Please hold on while we work on this.";
 
-            telexClient.sendInstruction(channelId, prompt2);
+            telexClient.sendInstruction(channelId, prompt3);
 
             generateAndSendResearch(channelId, details);
 
@@ -153,13 +163,6 @@ public class OpenAIChatService {
 
             String research = chatModel.call(researchPrompt);
             telexClient.sendInstruction(channelId, research);
-
-            // Generate pitch
-            String pitch = generatePitch(details, channelId);
-            telexClient.sendInstruction(channelId,
-                    "I've completed the initial research and generated a preliminary list. " +
-                            "Based on the gathered data, I've also drafted a tailored pitch:\n\n" + pitch);
-
             conversationStates.put(channelId, ConversationState.COMPLETE);
 
         } catch (Exception e) {
@@ -168,26 +171,43 @@ public class OpenAIChatService {
         }
     }
 
-    private String generatePitch(LeadDetails details, String channelId) throws JsonProcessingException {
-        exitProcess(channelId);
-        return String.format("""
-            Pitch
-            ---
-            I hope this message finds you well. I lead [Company name] - a firm dedicated to helping %s companies %s.
-            
-            We understand that every business faces unique challenges, and our tailored approach has empowered companies like [Example Client]. We specialize in [specific service] and believe we could add significant value to your operations.
-            
-            Would you be available for a brief call next week to discuss how we might support your goals?
-            """,
-                details.getCompanySizes(),
-                details.getBusinessType().isEmpty() ? "streamline operations and drive sustainable growth" : details.getBusinessType());
+    private List<String> generatePitches(LeadDetails details, List<RapidLeadDto> leads) throws JsonProcessingException {
+        List<String> pitches = new ArrayList<>();
+        for (RapidLeadDto lead : leads) {
+            String samplePitch = String.format("""
+                            Pitch
+                            ---
+                            I hope this message finds you well. I lead [Company name] - a firm dedicated to helping %s companies %s.
+                                        
+                            We understand that every business faces unique challenges, and our tailored approach has empowered companies like [Example Client]. We specialize in [specific service] and believe we could add significant value to your operations.
+                                        
+                            Would you be available for a brief call next week to discuss how we might support your goals?
+                            """,
+                    details.getCompanySizes(),
+                    details.getBusinessType().isEmpty() ? "streamline operations and drive sustainable growth" : details.getBusinessType());
+            String prompt = String.format("""
+                            Generate a short pitch personalized for %s , a %s company, located in %s. Also create a place for my name \s
+                             and my company.
+                             use sample pitch to improve your response.
+                             
+                             sample pitch : %s
+                            """,
+                    lead.getName(),
+                    details.getCompanySizes(),
+                    details.getLocations(),
+                    samplePitch);
+            String pitch = chatModel.call(prompt);
+            pitches.add(pitch);
+        }
+        return pitches;
     }
 
     private boolean isSaleAgentCalled(String message) {
         String request = String.format( """
-                Carefully analyze the text and determine whether it relates to lead generation by a sales agent.
+                You are pat the sales Agent. Carefully analyze the text and determine whether it relates to lead generation by a sales agent.
                 Look for explicit indicators such as references to prospecting, identifying potential customers,
-                outreach efforts, nurturing leads, sales,or follow-up strategies designed to convert prospects into clients.
+                outreach efforts, nurturing leads, sales,or follow-up strategies designed to convert prospects into clients or \s
+                calls you directly by your name i.e pat.
                 Answer the question does the text want to find leads?.\s
                  respond only with true or false.
                  the text: '%s'
@@ -236,9 +256,10 @@ public class OpenAIChatService {
         companySize = companySize.toLowerCase().trim();
 
         return switch (companySize) {
-            case "large", "l", "a" -> "A";
-            case "mid-sized", "mid", "b" -> "B";
-            case "small", "s", "c" -> "C";
+            case "large" -> "G";
+            case "very large" -> "I";
+            case "mid-sized", "medium" -> "D";
+            case "small" -> "B";
             default -> "C";
         };
     }
@@ -275,6 +296,8 @@ public class OpenAIChatService {
     private Integer convertLocationToId(String locationName) {
         Map<String, Integer> locationMap =Map.ofEntries(
                 entry("US", 103644278),
+                entry("Lagos", 104197452),
+                entry("Nigeria",105365761),
                 entry("ABUJA, FCT Nigeria", 101711968),
                 entry("London Area, United Kingdom", 90009496),
                 entry("Lekki, Lagos State, Nigeria", 111964948),
