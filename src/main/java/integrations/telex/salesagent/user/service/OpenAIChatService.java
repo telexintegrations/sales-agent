@@ -92,7 +92,9 @@ public class OpenAIChatService {
             log.info("Lead Details: {}", details);
             leadDetailsMap.put(channelId, details);
 
-            //details.setCompanySizeClass(classifyCompanySize(details.getCompanySizes()));
+            String sizeCode = classifyCompanySize(details.getCompanySizes());
+
+            log.info("Company size code: {}", sizeCode);
 
             String prompt1 = "Thank you for the details, I'll now conduct research on " +
                     details.getCompanySizes() + " companies in " + details.getLocations() +
@@ -134,9 +136,7 @@ public class OpenAIChatService {
             """, userInput);
 
         String response = chatModel.call(prompt);
-        LeadDetails extractedJSON = objectMapper.readValue(response, LeadDetails.class);
-        log.info("Extracted Object {}", extractedJSON);
-        return extractedJSON;
+        return objectMapper.readValue(response, LeadDetails.class);
     }
 
     private void generateAndSendResearch(String channelId, LeadDetails details) throws JsonProcessingException {
@@ -150,36 +150,6 @@ public class OpenAIChatService {
                 3. Recommended outreach approach
                 """,
                     details.getCompanySizes(), details.getBusinessType(), details.getLocations());
-
-            String research = chatModel.call(researchPrompt);
-            telexClient.sendInstruction(channelId, research);
-
-            // Generate pitch
-            String pitch = generatePitch(details, channelId);
-            telexClient.sendInstruction(channelId,
-                    "I've completed the initial research and generated a preliminary list. " +
-                            "Based on the gathered data, I've also drafted a tailored pitch:\n\n" + pitch);
-
-            conversationStates.put(channelId, ConversationState.COMPLETE);
-
-        } catch (Exception e) {
-            log.error("Research generation failed", e);
-            telexClient.sendInstruction(channelId, "I couldn't complete the research. Please try again.");
-        }
-    }
-
-    private void generateBusinessResearch(String channelId, LeadDetails details) throws JsonProcessingException {
-        try {
-            // Generate research
-            String researchPrompt = String.format("""
-                Provide a detailed business lead research for %s companies in %s.
-                Focus on companies that would benefit from %s services.
-                Include:
-                1. List of 5-10 potential leads with brief descriptions
-                2. Key market trends in this sector
-                3. Recommended outreach approach
-                """,
-                    details.getCompanySizes(), details.getLocations(), details.getBusinessType());
 
             String research = chatModel.call(researchPrompt);
             telexClient.sendInstruction(channelId, research);
@@ -259,11 +229,18 @@ public class OpenAIChatService {
     }
 
     private String classifyCompanySize(String companySize) {
-        if (companySize == null) return "C";
-        companySize = companySize.toLowerCase();
-        if (companySize.contains("mid")) return "B";
-        if (companySize.contains("large")) return "A";
-        return "C"; // default to small
+        if (companySize == null || companySize.isEmpty()) {
+            return "C";
+        }
+
+        companySize = companySize.toLowerCase().trim();
+
+        return switch (companySize) {
+            case "large", "l", "a" -> "A";
+            case "mid-sized", "mid", "b" -> "B";
+            case "small", "s", "c" -> "C";
+            default -> "C";
+        };
     }
 
     private CompanySearchRequest convertToCompanySearchRequest(LeadDetails details) {
