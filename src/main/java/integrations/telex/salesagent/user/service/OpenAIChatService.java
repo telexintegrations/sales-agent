@@ -1,7 +1,6 @@
 package integrations.telex.salesagent.user.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import integrations.telex.salesagent.lead.dto.CompanySearchRequest;
@@ -24,9 +23,8 @@ import static java.util.Map.entry;
 @Service
 @RequiredArgsConstructor
 public class OpenAIChatService {
-    private final OpenAIService openAIService;
     private final TelexClient telexClient;
-    private final Map<String, List<String>> channelResponses = new ConcurrentHashMap<>();
+    //private final Map<String, List<String>> channelResponses = new ConcurrentHashMap<>();
     private final MistralAiChatModel chatModel;
     private final ObjectMapper objectMapper;
     private final RequestFormatter requestFormatter;
@@ -57,6 +55,11 @@ public class OpenAIChatService {
             return;
         }
 
+        if (isRestartRequest(message)) {
+            restartConversation(channelId);
+            return;
+        }
+
         ConversationState currentState = conversationStates.getOrDefault(channelId, ConversationState.INITIAL);
 
         switch (currentState) {
@@ -73,18 +76,11 @@ public class OpenAIChatService {
                     Analyze the following text to determine if it contains the necessary parameters
                      for business type, search location, and company size. If all parameters are present, respond with
                       "I have understood the requirements. You are looking for [business type] businesses in [search location]
-                       with a size of [company size], let me get to that !".If any of the parameters are missing, respond with
+                       with a size of [company size], let me get to that!".If any of the parameters are missing, respond with
                        'Hi, to ensure accurate research, please confirm the business type and the specific location you're targeting,
                         along with any desired company size criteria.'
                         Text: '%s'"
                 """,message);
-//                      String prompt = String.format("""
-//                    Understood the intention of '%s'.
-//                    if it contains the all the parameters(business type, search location, company size)
-//                    return a friendly message showing you understand but if not,
-//
-//                    send 'To ensure accurate research, could you confirm your business type and the specific location you're targeting, along with any particular industry or company size criteria.'
-//                    """,message);
             String response = chatModel.call(prompt);
             telexClient.sendInstruction(channelId, response);
         }
@@ -154,7 +150,7 @@ public class OpenAIChatService {
             telexClient.sendInstruction(channelId, research);
 
             // Generate pitch
-            String pitch = generatePitch(details);
+            String pitch = generatePitch(details, channelId);
             telexClient.sendInstruction(channelId,
                     "I've completed the initial research and generated a preliminary list. " +
                             "Based on the gathered data, I've also drafted a tailored pitch:\n\n" + pitch);
@@ -184,7 +180,7 @@ public class OpenAIChatService {
             telexClient.sendInstruction(channelId, research);
 
             // Generate pitch
-            String pitch = generatePitch(details);
+            String pitch = generatePitch(details, channelId);
             telexClient.sendInstruction(channelId,
                     "I've completed the initial research and generated a preliminary list. " +
                             "Based on the gathered data, I've also drafted a tailored pitch:\n\n" + pitch);
@@ -197,11 +193,12 @@ public class OpenAIChatService {
         }
     }
 
-    private String generatePitch(LeadDetails details) {
+    private String generatePitch(LeadDetails details, String channelId) throws JsonProcessingException {
+        exitProcess(channelId);
         return String.format("""
             Pitch
             ---
-            I hope this message finds you well. My name is John Dowell and I lead [Company name] - a firm dedicated to helping %s companies %s.
+            I hope this message finds you well. I lead [Company name] - a firm dedicated to helping %s companies %s.
             
             We understand that every business faces unique challenges, and our tailored approach has empowered companies like [Example Client]. We specialize in [specific service] and believe we could add significant value to your operations.
             
@@ -217,9 +214,9 @@ public class OpenAIChatService {
                 Look for explicit indicators such as references to prospecting, identifying potential customers,
                 outreach efforts, nurturing leads, sales,or follow-up strategies designed to convert prospects into clients.
                 Answer the question does the text want to find leads?.\s
-                 respond only with True or False.
+                 respond only with true or false.
                  the text: '%s'
-                 """,message);
+                \s""", message);
         String response = chatModel.call(request).toLowerCase();
         return response.contains("true");
     }
@@ -233,8 +230,19 @@ public class OpenAIChatService {
     private void restartConversation(String channelId) throws JsonProcessingException {
         conversationStates.put(channelId, ConversationState.INITIAL);
         leadDetailsMap.remove(channelId);
-        telexClient.sendInstruction(channelId, "What would you like to research next? You can say something like: " +
-                "\"I need help generating leads for my digital marketing agency targeting tech startups in Berlin\"");
+        telexClient.sendInstruction(channelId, "What would you like to do? You can say something like: " +
+                "\"I need help generating leads for my digital marketing agency targeting tech startups in Abuja\"");
+    }
+
+    private boolean isRestartRequest(String message) {
+        String prompt = String.format("""
+        Analyze if the user wants to restart or start over.\s
+        Look for phrases like: "start over", "restart", "new search", "begin again", etc.
+        Respond ONLY with 'true' or 'false'.
+        Message: '%s'
+       \s""", message);
+        String response = chatModel.call(prompt).toLowerCase().trim();
+        return response.equals("true");
     }
 
     private String classifyCompanySize(String companySize) {
@@ -255,7 +263,7 @@ public class OpenAIChatService {
         if (details.getLocations() != null && !details.getLocations().isEmpty()) {
             List<Integer> locationIds = Arrays.stream(details.getLocations().split(","))
                     .map(String::trim)
-                    .map(this::convertLocationToId) // You'll need to implement this
+                    .map(this::convertLocationToId)
                     .filter(Objects::nonNull)
                     .toList();
             request.setLocations(locationIds);
@@ -308,71 +316,3 @@ public class OpenAIChatService {
         };
     }
 }
-
-/*
-   private void handleInitialState(String channelId, String message) throws JsonProcessingException {
-        if (isSaleAgentCalled(message) || message.equalsIgnoreCase("/start")) {
-            conversationStates.put(channelId, ConversationState.AWAITING_DOMAIN);
-//            String prompt = """
-//                Welcome! I'm your Sales Agent Assistant.
-//                Please tell me what type of leads you're looking for and the location.
-//                Examples:
-//                - "I need laundromat leads in Lagos"
-//                - "Looking for tech startups in Berlin"
-//                - "Restaurant owners in New York"
-//                """;
-            String prompt = """
-                    Understood. To ensure accurate research, could you confirm your business type and the specific location you're targeting, along with any particular industry or company size criteria?
-                    """;
-            telexClient.sendInstruction(channelId, prompt);
-        }
-    }
- */
-
-/*
-Hello, I need assistance generating leads for my business consulting firm.
-
-Understood. To ensure accurate research, could you confirm your business type and the specific location you're targeting, along with any particular industry or company size criteria?
-
-I'm running a consulting firm in Lagos, and I'm specifically looking for mid-sized companies?
-
-Thank you for the details, I'll now conduct research on mid-sized companies in the Lagos to compile a list of potential leads. Please hold on while we work on this.
-
-I've completed the initial research and generated a preliminary list. Based on the gathered data, I've also drafted a tailored pitch that outlines your consulting expertise and the unique value you offer to these companies.
-
-Pitch
-I hope this message finds you well. My name is John Dowell and I lead BrightPath Consulting - a firm dedicated to helping mid-sized companies streamline operations and drive sustainable growth. We understand that every business faces unique challenges, and our tailored approach has empowered companies like Innovative Tech.
- */
-
-//    private void handleConfirmation(String channelId, String message) throws JsonProcessingException {
-//        String searchTerm = channelResponses.computeIfAbsent(channelId, k -> new ArrayList<>()).getFirst();
-//        completeResearch(channelId, searchTerm, message);
-//    }
-
-//    private void completeResearch(String channelId, String searchTerm, String location) throws JsonProcessingException {
-//        try {
-//            String researchResults = generateLeadResearch(searchTerm, location);
-//            telexClient.sendInstruction(channelId, researchResults);
-//            conversationStates.put(channelId, ConversationState.COMPLETE);
-//
-//            // Log the successful search (previously was saving to DB)
-//            log.info("Completed research for {} in {}", searchTerm, location);
-//        } catch (Exception e) {
-//            log.error("Research failed", e);
-//            telexClient.sendInstruction(channelId, "Sorry, I couldn't complete the research. Please try again.");
-//        }
-//    }
-
-//    private String generateLeadResearch(String searchTerm, String location) {
-//        String prompt = String.format("""
-//            Act as a professional business lead researcher. Provide information about %s in %s including:
-//            1. Potential leads (business names/types)
-//            2. Market trends
-//            3. Competitive landscape
-//            4. Recommended outreach strategy
-//
-//            Format with clear headings and bullet points.
-//            """, searchTerm, location);
-//
-//        return openAIService.getResponse(prompt);
-//    }
