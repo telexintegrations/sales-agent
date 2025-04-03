@@ -13,6 +13,7 @@ import integrations.telex.salesagent.user.utils.RequestFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.mistralai.MistralAiChatModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -70,7 +71,9 @@ public class OpenAIChatService {
         }
     }
 
-    private void handleInitialState(String channelId, String message) throws JsonProcessingException {
+    private Map<String, String> handleInitialState(String channelId, String message) throws JsonProcessingException {
+        Map<String, String> responsePayload = new HashMap<>();
+
         if (isSaleAgentCalled(message)) {
             conversationStates.put(channelId, ConversationState.AWAITING_DETAILS);
             String prompt = String.format("""
@@ -81,10 +84,16 @@ public class OpenAIChatService {
                        'Hi, to ensure accurate research, please confirm the business type and the specific location you're targeting,
                         along with any desired company size criteria.'
                         Text: '%s'"
-                """,message);
+                """, message);
             String response = chatModel.call(prompt);
             telexClient.sendInstruction(channelId, response);
+
+            responsePayload.put("channelId", channelId);
+            responsePayload.put("message", response);
+            responsePayload.put("state", "AWAITING_DETAILS");
         }
+
+        return responsePayload;
     }
 
     private void handleDetailsInput(String channelId, String message) throws JsonProcessingException {
@@ -172,7 +181,7 @@ public class OpenAIChatService {
 
         } catch (Exception e) {
             log.error("Research generation failed", e);
-            telexClient.sendInstruction(channelId, "I couldn't complete the research. Please try again.");
+            telexClient.failedInstruction(channelId, "I couldn't complete the research. Please try again.");
         }
     }
 
@@ -183,9 +192,7 @@ public class OpenAIChatService {
                             Pitch
                             ---
                             I hope this message finds you well. I lead [Company name] - a firm dedicated to helping %s companies %s.
-                                        
                             We understand that every business faces unique challenges, and our tailored approach has empowered companies like [Example Client]. We specialize in [specific service] and believe we could add significant value to your operations.
-                                        
                             Would you be available for a brief call next week to discuss how we might support your goals?
                             """,
                     details.getCompanySizes(),
@@ -194,7 +201,6 @@ public class OpenAIChatService {
                             Generate a short pitch personalized for %s , a %s company, located in %s. Also create a place for my name \s
                              and my company.
                              use sample pitch to improve your response.
-                             
                              sample pitch : %s
                             """,
                     lead.getName(),
