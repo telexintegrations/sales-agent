@@ -71,9 +71,7 @@ public class OpenAIChatService {
         }
     }
 
-    private Map<String, String> handleInitialState(String channelId, String message) throws JsonProcessingException {
-        Map<String, String> responsePayload = new HashMap<>();
-
+    private void handleInitialState(String channelId, String message) throws JsonProcessingException {
         if (isSaleAgentCalled(message)) {
             conversationStates.put(channelId, ConversationState.AWAITING_DETAILS);
             String prompt = String.format("""
@@ -87,13 +85,7 @@ public class OpenAIChatService {
                 """, message);
             String response = chatModel.call(prompt);
             telexClient.sendInstruction(channelId, response);
-
-            responsePayload.put("channelId", channelId);
-            responsePayload.put("message", response);
-            responsePayload.put("state", "AWAITING_DETAILS");
         }
-
-        return responsePayload;
     }
 
     private void handleDetailsInput(String channelId, String message) throws JsonProcessingException {
