@@ -1,0 +1,688 @@
+{
+	"info": {
+		"_postman_id": "4d64f118-cf59-4852-b1f1-d28962e0ec4c",
+		"name": "Sales Agent",
+		"description": "Sales Agent Integration introduces a cutting-edge solution for business owners to discover potential leads with ease. By specifying their business type and target audience through a simple chat with a sales agent, users receive a curated list of relevant leads in an organized format. This streamlined process enhances customer outreach and supports business growth.  \nKey Features\n\n- Chat-Based Input: Business owners can provide their business type and target audience through a friendly chat interface with the sales agent on the telex platform.\n    \n- Curated Lead Generation: The sales agent retrieves a list of potential leads tailored to the specified criteria.\n    \n- Organized Output: Leads are presented in a clear and easy-to-read format.\n    \n- Custom Automation: The lead retrieval process runs automatically at a set time, ensuring business owners always have access to updated leads.\n    \n- Telex Success Notifications: Users receive success messages via the Telex channel whenever new leads are fetched.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42396937",
+		"_collection_link": "https://testing-team-2564.postman.co/workspace/Telex-AI-Agents~fdc3e089-433e-4df7-8420-3cfd6fb5a055/collection/42396937-4d64f118-cf59-4852-b1f1-d28962e0ec4c?action=share&source=collection_link&creator=42396937"
+	},
+	"item": [
+		{
+			"name": "Sales Agent Integration with Valid url",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status is 200 OK\", function () { pm.response.to.have.status(200); });\r",
+							"try { let jsonData = pm.response.json();\r",
+							"pm.test(\"Response has required structure\", function () {\r",
+							"    pm.expect(jsonData).to.have.property(\"data\");\r",
+							"    pm.expect(jsonData.data).to.have.property(\"date\");\r",
+							"    pm.expect(jsonData.data).to.have.property(\"descriptions\");\r",
+							"    pm.expect(jsonData.data).to.have.property(\"is_active\");\r",
+							"    pm.expect(jsonData.data).to.have.property(\"integration_type\");\r",
+							"    pm.expect(jsonData.data).to.have.property(\"integration_category\");\r",
+							"    pm.expect(jsonData.data).to.have.property(\"key_features\");\r",
+							"    pm.expect(jsonData.data).to.have.property(\"author\");\r",
+							"    pm.expect(jsonData.data).to.have.property(\"settings\");\r",
+							"    pm.expect(jsonData.data).to.have.property(\"target_url\");\r",
+							"    pm.expect(jsonData.data).to.have.property(\"tick_url\");\r",
+							"    pm.expect(jsonData.data).to.have.property(\"bot\");\r",
+							"});\r",
+							"pm.test(\"is_active is true\", function () {\r",
+							"    pm.expect(jsonData.data.is_active).to.be.true;\r",
+							"});\r",
+							"} catch (error) { console.error(\"JSON parsing error\", error); pm.test(\"Valid JSON response\", function () { pm.expect(false, \"Response is not a valid JSON\").to.be.true; }); }"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://sales-agent-3wyf.onrender.com/integration.json",
+					"protocol": "https",
+					"host": [
+						"sales-agent-3wyf",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"integration.json"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verify POST request don't validate GET request",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Pre-request Script for /webhook 400 Error Test\r",
+							"const moment = require('moment');\r",
+							"\r",
+							"// 1. Generate dynamic test data\r",
+							"const invalidPayloads = [\r",
+							"    { invalidField: \"test\" },\r",
+							"    { missingRequired: true },\r",
+							"    { malformedData: \"2025-13-40\" } // Invalid date format\r",
+							"];\r",
+							"\r",
+							"// 2. Select a random invalid payload for variety\r",
+							"const selectedPayload = invalidPayloads[Math.floor(Math.random() * invalidPayloads.length)];\r",
+							"pm.environment.set(\"invalidPayload\", JSON.stringify(selectedPayload));\r",
+							"\r",
+							"// 3. Set headers\r",
+							"pm.request.headers.add({\r",
+							"    key: \"Content-Type\",\r",
+							"    value: \"application/json\"\r",
+							"});\r",
+							"\r",
+							"// 4. Add timestamp header for tracking\r",
+							"const timestamp = moment().toISOString();\r",
+							"pm.request.headers.add({\r",
+							"    key: \"X-Request-Timestamp\",\r",
+							"    value: timestamp\r",
+							"});\r",
+							"\r",
+							"// 5. Log what will be sent\r",
+							"console.log(\"Sending payload:\", selectedPayload);\r",
+							"console.log(\"Request timestamp:\", timestamp);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Fixed syntax error by correcting the property assertion\r",
+							"pm.test(\"Response has correct error structure\", function () {\r",
+							"    const response = pm.response.json();\r",
+							"    pm.expect(response).to.have.property(\"timestamp\");\r",
+							"    pm.expect(response).to.have.property(\"status\").to.equal(400);\r",
+							"    pm.expect(response).to.have.property(\"error\").to.equal(\"Bad Request\");\r",
+							"    pm.expect(response).to.have.property(\"path\").to.equal(\"/webhook\");\r",
+							"});\r",
+							"\r",
+							"// Validate Content-Type Header\r",
+							"pm.test(\"Content-Type is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"// Validate API status code\r",
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"// Validate response time\r",
+							"pm.test(\"Response time is within 500ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://sales-agent-3wyf.onrender.com/webhook",
+					"protocol": "https",
+					"host": [
+						"sales-agent-3wyf",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"webhook"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verify Sales Agent invalid url return 400 bad request",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.get(\"Not Found\");"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Validate response for an invalid URL\r",
+							"pm.test(\"Validate response structure and status\", function () {\r",
+							"    // Check status code is 404\r",
+							"    pm.response.to.have.status(404);\r",
+							"    \r",
+							"    // Validate response body contains 'Not Found'\r",
+							"    pm.test(\"Response body should contain 'Not Found'\", function () {\r",
+							"        pm.expect(pm.response.text()).to.include(\"Not Found\");\r",
+							"    });\r",
+							"    \r",
+							"    // Only check 'is_active' if the response is in JSON format\r",
+							"    pm.test(\"Check if is_active is true (only if JSON)\", function () {\r",
+							"        let jsonData;\r",
+							"        try {\r",
+							"            jsonData = pm.response.json();  // Attempt to parse JSON\r",
+							"            pm.expect(jsonData.is_active).to.equal(true);  // Only check 'is_active' if JSON is returned\r",
+							"        } catch (e) {\r",
+							"            // If the response is not JSON, log it as an empty object\r",
+							"            jsonData = {};\r",
+							"            // Handle error or skip the 'is_active' check for non-JSON responses\r",
+							"            console.log(\"Response is not in JSON format or missing 'is_active' field.\");\r",
+							"        }\r",
+							"    });\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://sales-agents-34wyf.onrender.com/integration.json",
+					"protocol": "https",
+					"host": [
+						"sales-agents-34wyf",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"integration.json"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "save response",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://sales-agents-34wyf.onrender.com/integration.json",
+							"protocol": "https",
+							"host": [
+								"sales-agents-34wyf",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"integration.json"
+							]
+						}
+					},
+					"status": "Not Found",
+					"code": 404,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Thu, 03 Apr 2025 00:05:26 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "text/plain; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "10"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "x-content-type-options",
+							"value": "nosniff"
+						},
+						{
+							"key": "x-render-routing",
+							"value": "no-server"
+						},
+						{
+							"key": "cf-cache-status",
+							"value": "DYNAMIC"
+						},
+						{
+							"key": "Server",
+							"value": "cloudflare"
+						},
+						{
+							"key": "CF-RAY",
+							"value": "92a4507508b2e63b-IAD"
+						},
+						{
+							"key": "alt-svc",
+							"value": "h3=\":443\"; ma=86400"
+						}
+					],
+					"cookie": [],
+					"body": "Not Found\n"
+				}
+			]
+		},
+		{
+			"name": "Ensure chat in channel using valid channel id",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set(\"message\", \"<p>i want to generate leads</p><p></p>\");\r",
+							"pm.collectionVariables.set(\"channel_id\", \"0195cee4-0237-75a4-b5b4-3b67bc179b07\");\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check if the status code is 200 before parsing\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// If the status code is 200, parse the JSON response\r",
+							"if (pm.response.status === 200) {\r",
+							"    let jsonData = pm.response.json();\r",
+							"\r",
+							"    // Validate Content-Type Header\r",
+							"    pm.test(\"Content-Type is application/json\", function () {\r",
+							"        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+							"    });\r",
+							"\r",
+							"    // Validate the response has the required structure\r",
+							"    pm.test(\"Response has required structure\", function () {\r",
+							"        pm.expect(jsonData).to.have.property(\"data\");\r",
+							"        pm.expect(jsonData.data).to.have.property(\"date\");\r",
+							"        pm.expect(jsonData.data).to.have.property(\"descriptions\");\r",
+							"        pm.expect(jsonData.data).to.have.property(\"is_active\");\r",
+							"        pm.expect(jsonData.data).to.have.property(\"integration_type\");\r",
+							"        pm.expect(jsonData.data).to.have.property(\"integration_category\");\r",
+							"        pm.expect(jsonData.data).to.have.property(\"key_features\");\r",
+							"        pm.expect(jsonData.data).to.have.property(\"author\");\r",
+							"        pm.expect(jsonData.data).to.have.property(\"settings\");\r",
+							"        pm.expect(jsonData.data).to.have.property(\"target_url\");\r",
+							"        pm.expect(jsonData.data).to.have.property(\"tick_url\");\r",
+							"        pm.expect(jsonData.data).to.have.property(\"bot\");\r",
+							"    });\r",
+							"} else {\r",
+							"    pm.test(\"Response body is empty or no data returned\", function () {\r",
+							"        pm.expect(pm.response.text()).to.equal(\"\"); // Verify if the response body is empty\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "spring.ai.mistralai.base-url",
+						"value": "https://api.mistral.ai",
+						"type": "text"
+					},
+					{
+						"key": "spring.ai.mistralai.api-key",
+						"value": "WniJIBkesnVc4lsenjT4MdJaitVynild",
+						"type": "text"
+					},
+					{
+						"key": "rapidapi.key",
+						"value": "bb6b4c6390msh46fa764b7a6ef87p15bbe3jsn29a0b402bdbf",
+						"type": "text"
+					},
+					{
+						"key": "rapidapi.url",
+						"value": "https://linkedin-api8.p.rapidapi.com/companies/search",
+						"type": "text"
+					},
+					{
+						"key": "rapidapi.host",
+						"value": "linkedin-api8.p.rapidapi.com",
+						"type": "text"
+					},
+					{
+						"key": "telex.webhook.url",
+						"value": "https://ping.telex.im/v1/webhooks/",
+						"type": "text"
+					},
+					{
+						"key": "sandbox.baseURL",
+						"value": "https://s030kpkd-8080.uks1.devtunnels.ms",
+						"type": "text"
+					},
+					{
+						"key": "production.baseURL",
+						"value": "https://sales-agent-3wyf.onrender.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"message\": \"<p>i want to generate leads</p><p></p>\",\r\n   \"settings\": [\r\n     {\r\n       \"default\": \"9a068459-a9d8-40de-924f-fcf92f867eed\",\r\n       \"label\": \"webhook-slug\",\r\n       \"required\": true,\r\n       \"type\": \"text\"\r\n     }\r\n   ],\r\n   \"channel_id\": \"0195cee4-0237-75a4-b5b4-3b67bc179b07\",\r\n   \"thread_id\": \"\",\r\n   \"org_id\": \"\",\r\n   \"auth_settings\": { \"integration_auth_credentials\": \"\", \"telex_api_key\": \"\" }\r\n }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://sales-agent-3wyf.onrender.com/webhook",
+					"protocol": "https",
+					"host": [
+						"sales-agent-3wyf",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"webhook"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Ensure chat in channel without using webhook",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set(\"message\", \"<p>i want to generate leads</p><p></p>\");\r",
+							"pm.collectionVariables.set(\"channel_id\", \"0195cee4-0237-75a4-b5b4-3b67bc179b07\");"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Validate response for correct request structure\r",
+							"pm.test(\"Validate response structure and status\", function () {\r",
+							"    // Check status code is 404 OK\r",
+							"    pm.response.to.have.status(404);\r",
+							"    \r",
+							"    // Check response time is within 500ms\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							"\r",
+							"// Validate Content-Type Header\r",
+							"pm.test(\"Content-Type is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response has required structure\", function () {\r",
+							"    var jsonData = pm.response.json(); // Corrected variable name\r",
+							"    pm.expect(jsonData).to.have.property(\"timestamp\"); // Updated property references\r",
+							"    pm.expect(jsonData).to.have.property(\"status\");\r",
+							"    pm.expect(jsonData).to.have.property(\"error\");\r",
+							"    pm.expect(jsonData).to.have.property(\"path\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "spring.ai.mistralai.base-url",
+						"value": "https://api.mistral.ai",
+						"type": "text"
+					},
+					{
+						"key": "spring.ai.mistralai.api-key",
+						"value": "WniJIBkesnVc4lsenjT4MdJaitVynild",
+						"type": "text"
+					},
+					{
+						"key": "rapidapi.key",
+						"value": "bb6b4c6390msh46fa764b7a6ef87p15bbe3jsn29a0b402bdbf",
+						"type": "text"
+					},
+					{
+						"key": "rapidapi.url",
+						"value": "https://linkedin-api8.p.rapidapi.com/companies/search",
+						"type": "text"
+					},
+					{
+						"key": "rapidapi.host",
+						"value": "linkedin-api8.p.rapidapi.com",
+						"type": "text"
+					},
+					{
+						"key": "telex.webhook.url",
+						"value": "https://ping.telex.im/v1/webhooks/",
+						"type": "text"
+					},
+					{
+						"key": "sandbox.baseURL",
+						"value": "https://s030kpkd-8080.uks1.devtunnels.ms",
+						"type": "text"
+					},
+					{
+						"key": "production.baseURL",
+						"value": "https://sales-agent-3wyf.onrender.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"message\": \"<p>i want to generate leads</p><p></p>\",\r\n   \"settings\": [\r\n     {\r\n       \"default\": \"9a068459-a9d8-40de-924f-fcf92f867eed\",\r\n       \"label\": \"webhook-slug\",\r\n       \"required\": true,\r\n       \"type\": \"text\"\r\n     }\r\n   ],\r\n   \"channel_id\": \"0195cee4-0237-75a4-b5b4-3b67bc179b07\",\r\n   \"thread_id\": \"\",\r\n   \"org_id\": \"\",\r\n   \"auth_settings\": { \"integration_auth_credentials\": \"\", \"telex_api_key\": \"\" }\r\n }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://sales-agent-3wyf.onrender.com/",
+					"protocol": "https",
+					"host": [
+						"sales-agent-3wyf",
+						"onrender",
+						"com"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Ensure chat in channel using valid channel id Copy",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "spring.ai.mistralai.base-url",
+								"value": "https://api.mistral.ai",
+								"type": "text"
+							},
+							{
+								"key": "spring.ai.mistralai.api-key",
+								"value": "WniJIBkesnVc4lsenjT4MdJaitVynild",
+								"type": "text"
+							},
+							{
+								"key": "rapidapi.key",
+								"value": "bb6b4c6390msh46fa764b7a6ef87p15bbe3jsn29a0b402bdbf",
+								"type": "text"
+							},
+							{
+								"key": "rapidapi.url",
+								"value": "https://linkedin-api8.p.rapidapi.com/companies/search",
+								"type": "text"
+							},
+							{
+								"key": "rapidapi.host",
+								"value": "linkedin-api8.p.rapidapi.com",
+								"type": "text"
+							},
+							{
+								"key": "telex.webhook.url",
+								"value": "https://ping.telex.im/v1/webhooks/",
+								"type": "text"
+							},
+							{
+								"key": "sandbox.baseURL",
+								"value": "https://s030kpkd-8080.uks1.devtunnels.ms",
+								"type": "text"
+							},
+							{
+								"key": "production.baseURL",
+								"value": "https://sales-agent-3wyf.onrender.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n   \"message\": \"<p>i want to generate leads</p><p></p>\",\r\n   \"settings\": [\r\n     {\r\n       \"default\": \"9a068459-a9d8-40de-924f-fcf92f867eed\",\r\n       \"label\": \"webhook-slug\",\r\n       \"required\": true,\r\n       \"type\": \"text\"\r\n     }\r\n   ],\r\n   \"channel_id\": \"0195cee4-0237-75a4-b5b4-3b67bc179b07\",\r\n   \"thread_id\": \"\",\r\n   \"org_id\": \"\",\r\n   \"auth_settings\": { \"integration_auth_credentials\": \"\", \"telex_api_key\": \"\" }\r\n }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://sales-agent-3wyf.onrender.com/",
+							"protocol": "https",
+							"host": [
+								"sales-agent-3wyf",
+								"onrender",
+								"com"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"status": "Not Found",
+					"code": 404,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Thu, 03 Apr 2025 13:17:24 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "br"
+						},
+						{
+							"key": "rndr-id",
+							"value": "8d0c7ceb-cc46-46b5"
+						},
+						{
+							"key": "vary",
+							"value": "Origin"
+						},
+						{
+							"key": "vary",
+							"value": "Access-Control-Request-Method"
+						},
+						{
+							"key": "vary",
+							"value": "Access-Control-Request-Headers"
+						},
+						{
+							"key": "vary",
+							"value": "Accept-Encoding"
+						},
+						{
+							"key": "x-render-origin-server",
+							"value": "Render"
+						},
+						{
+							"key": "cf-cache-status",
+							"value": "DYNAMIC"
+						},
+						{
+							"key": "Server",
+							"value": "cloudflare"
+						},
+						{
+							"key": "CF-RAY",
+							"value": "92a8d8958f5257f7-IAD"
+						},
+						{
+							"key": "alt-svc",
+							"value": "h3=\":443\"; ma=86400"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"timestamp\": \"2025-04-03T13:17:24.780+00:00\",\n    \"status\": 404,\n    \"error\": \"Not Found\",\n    \"path\": \"/\"\n}"
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "message",
+			"value": ""
+		},
+		{
+			"key": "channel_id",
+			"value": ""
+		}
+	]
+}
