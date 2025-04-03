@@ -5,10 +5,12 @@ on:
     branches: [dev, main]
     paths:
       - "src/**"
+      - "postman/**"
   pull_request:
     branches: [dev, main]
     paths:
       - "src/**"
+      - "postman/**"
 
 jobs:
   test:
@@ -32,31 +34,16 @@ jobs:
           restore-keys: |
             maven-${{ runner.os }}-
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Build & Run Tests with Maven
         run: mvn clean package -DskipTests
 
-      - name: Ensure JAR file exists
-        run: |
-          if [ -z "$(ls -A target/*.jar 2>/dev/null)" ]; then
-            echo "ERROR: No JAR file found!"
-            exit 1
-          fi
-
-      - name: Start Spring Boot Application
-        run: nohup java -jar target/*.jar > app.log 2>&1 &
-
-      - name: Wait for API to Start
-        run: |
-          for i in {1..30}; do
-            if curl --silent --fail http://localhost:8080/actuator/health; then
-              echo "API is up!"
-              exit 0
-            fi
-            echo "Waiting for API..."
-            sleep 5
-          done
-          echo "ERROR: API failed to start."
-          exit 1
+      - name: Install Newman and Reporters
+        run: npm install -g newman newman-reporter-html newman-reporter-json
 
       - name: Ensure Postman Collection Exists
         run: |
@@ -64,14 +51,6 @@ jobs:
             echo "ERROR: Postman collection file not found!"
             exit 1
           fi
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Install Newman and Reporters
-        run: npm install -g newman newman-reporter-html newman-reporter-json
 
       - name: Run Newman Tests and Generate Report
         run: |
@@ -81,6 +60,8 @@ jobs:
           --reporters cli,json,html \
           --reporter-json-export test-reports/newman-report-$TIMESTAMP.json \
           --reporter-html-export test-reports/newman-report-$TIMESTAMP.html
+        env:
+          API_BASE_URL: https://sales-agent-3wyf.onrender.com
 
       - name: Upload Test Reports
         uses: actions/upload-artifact@v4
