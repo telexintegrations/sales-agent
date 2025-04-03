@@ -36,25 +36,25 @@ public class LeadPeopleResearchService {
 
     public List<RapidLeadDto> queryLeads(String channelID, PeopleSearchRequest request) {
         try {
-            // 1. Prepare headers
+            // Prepare headers
             HttpHeaders headers = new HttpHeaders();
             headers.set("X-RapidAPI-Key", rapidApiKey);
             headers.set("X-RapidAPI-Host", rapidApiHost);
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            // 2. Build the request body (LinkedIn search URL)
+            // Build the request body (LinkedIn search URL)
             Map<String, String> payload = new HashMap<>();
             payload.put("url", request.getUrl());
 
             HttpEntity<Map<String, String>> entity = new HttpEntity<>(payload, headers);
 
-            // 3. Call RapidAPI
+            // Call RapidAPI
             log.info("Searching for people with URL: {}", request.getUrl());
             ResponseEntity<String> response = restTemplate.exchange(
                     rapidApiUrl, HttpMethod.POST, entity, String.class
             );
 
-            // 4. Process the response
+            // Process the response
             if (response.getStatusCode().is2xxSuccessful()) {
                 List<RapidLeadDto> leads = formatPeopleResponse(response.getBody());
 
@@ -87,7 +87,7 @@ public class LeadPeopleResearchService {
             if (items.isArray()) {
                 for (JsonNode item : items) {
                     RapidLeadDto lead = new RapidLeadDto(
-                            null,  // No ID in response
+                            null,
                             item.path("fullName").asText(),
                             item.path("profileURL").asText(),
                             String.format("%s | %s",
