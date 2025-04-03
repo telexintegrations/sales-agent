@@ -26,7 +26,6 @@ import static java.util.Map.entry;
 @RequiredArgsConstructor
 public class OpenAIChatService {
     private final TelexClient telexClient;
-    //private final Map<String, List<String>> channelResponses = new ConcurrentHashMap<>();
     private final MistralAiChatModel chatModel;
     private final ObjectMapper objectMapper;
     private final RequestFormatter requestFormatter;
