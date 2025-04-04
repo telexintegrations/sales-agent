@@ -22,7 +22,6 @@ public class TelexClient {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final FormatTelexMessage formatTelexMessage;
-    private final LeadPeopleResearchService leadPeopleResearchService;
 
     public void sendToTelexChannel(String channelID, String message) {
         try {
