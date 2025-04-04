@@ -69,7 +69,7 @@ public class RapidLeadResearch {
 
                 // Forward each lead to Telex
                 for (RapidLeadDto lead : newLeads) {
-                    telexClient.processTelexPayload(channelID, lead);
+                    //telexClient.processTelexPayload(channelID, lead);
                     log.info("Lead sent to Telex: {}", lead.getName());
                 }
             } else {

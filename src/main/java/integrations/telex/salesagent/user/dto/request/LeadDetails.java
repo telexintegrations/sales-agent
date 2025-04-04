@@ -10,7 +10,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LeadDetails {
+//    private String businessType;
+//    private String locations;
+//    private String companySizes;
     private String businessType;
-    private String locations;
-    private String companySizes;
+    private String location;
+    private String keyword;
 }

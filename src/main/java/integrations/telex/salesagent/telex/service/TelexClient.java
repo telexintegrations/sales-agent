@@ -3,8 +3,10 @@ package integrations.telex.salesagent.telex.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import integrations.telex.salesagent.config.AppConfig;
+import integrations.telex.salesagent.lead.dto.PeopleLeadDto;
 import integrations.telex.salesagent.lead.dto.RapidLeadDto;
 import integrations.telex.salesagent.lead.model.Lead;
+import integrations.telex.salesagent.lead.service.LeadPeopleResearchService;
 import integrations.telex.salesagent.telex.util.FormatTelexMessage;
 import integrations.telex.salesagent.user.dto.request.TelexPayload;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ public class TelexClient {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final FormatTelexMessage formatTelexMessage;
+    private final LeadPeopleResearchService leadPeopleResearchService;
 
     public void sendToTelexChannel(String channelID, String message) {
         try {
@@ -32,7 +35,15 @@ public class TelexClient {
         }
     }
 
-    public void processTelexPayload(String channelID, RapidLeadDto lead) throws JsonProcessingException {
+//    public void processTelexPayload(String channelID, RapidLeadDto lead) throws JsonProcessingException {
+//        String message = formatTelexMessage.formatNewLeadMessage(lead) + "\n\nSales Agent Bot";
+//
+//        TelexPayload telexPayload = new TelexPayload("New Lead Alert", "Sales Agent", "success", message);
+//
+//        sendToTelexChannel(channelID, objectMapper.writeValueAsString(telexPayload));
+//    }
+
+    public void processTelexPayload(String channelID, PeopleLeadDto lead) throws JsonProcessingException {
         String message = formatTelexMessage.formatNewLeadMessage(lead) + "\n\nSales Agent Bot";
 
         TelexPayload telexPayload = new TelexPayload("New Lead Alert", "Sales Agent", "success", message);

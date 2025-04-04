@@ -4,8 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import integrations.telex.salesagent.lead.dto.CompanySearchRequest;
+import integrations.telex.salesagent.lead.dto.PeopleLeadDto;
+import integrations.telex.salesagent.lead.dto.PeopleSearchRequest;
 import integrations.telex.salesagent.lead.dto.RapidLeadDto;
 import integrations.telex.salesagent.lead.enums.CompanySize;
+import integrations.telex.salesagent.lead.service.LeadPeopleResearchService;
 import integrations.telex.salesagent.lead.service.RapidLeadResearch;
 import integrations.telex.salesagent.telex.service.TelexClient;
 import integrations.telex.salesagent.user.dto.request.LeadDetails;
@@ -29,7 +32,8 @@ public class OpenAIChatService {
     private final MistralAiChatModel chatModel;
     private final ObjectMapper objectMapper;
     private final RequestFormatter requestFormatter;
-    private final RapidLeadResearch rapidLeadResearch;
+    //private final RapidLeadResearch rapidLeadResearch;
+    private final LeadPeopleResearchService leadPeopleResearchService;
 
     private enum ConversationState {
         INITIAL,
@@ -75,11 +79,11 @@ public class OpenAIChatService {
             conversationStates.put(channelId, ConversationState.AWAITING_DETAILS);
             String prompt = String.format("""
                     Analyze the following text to determine if it contains the necessary parameters
-                     for business type, search location, and company size. If all parameters are present, respond with
-                      "I have understood the requirements. You are looking for [business type] businesses in [search location]
-                       with a size of [company size], let me get to that!".If any of the parameters are missing, respond with
+                     for business type, search location, and keyword. If all parameters are present, respond with
+                      "I have understood the requirements. You are looking for [keyword] leads in [search location]
+                       for [business type], let me get to that!".If any of the parameters are missing, respond with
                        'Hi, to ensure accurate research, please confirm the business type and the specific location you're targeting,
-                        along with any desired company size criteria.'
+                        along with any desired lead e.g. software engineer.'
                         Text: '%s'"
                 """, message);
             String response = chatModel.call(prompt);
@@ -93,40 +97,33 @@ public class OpenAIChatService {
             log.info("Lead Details: {}", details);
             leadDetailsMap.put(channelId, details);
 
-            if (details.getLocations() == null || details.getBusinessType() == null) {
+            if (details.getLocation() == null || details.getBusinessType() == null) {
                 restartConversation(channelId);
                 return;
             }
 
-            String sizeCode = classifyCompanySize(details.getCompanySizes());
-
-            log.info("Company size code: {}", sizeCode);
-
-            String prompt1 = "Thank you for the details, I'll now conduct research on " +
-                    details.getCompanySizes() + " companies in " + details.getLocations() +
+            String prompt = "Thank you for the details, I'll now fetch leads for " + details.getKeyword() + " in " + details.getLocation() +
                     " to compile a list of potential linkedIn profiles. Please hold on while we work on this.";
 
-            telexClient.sendInstruction(channelId, prompt1);
+            telexClient.sendInstruction(channelId, prompt);
 
-            CompanySearchRequest searchRequest = convertToCompanySearchRequest(details);
-            rapidLeadResearch.queryLeads(channelId, searchRequest);
-            List<RapidLeadDto> leads = rapidLeadResearch.queryLeads(channelId,searchRequest);
-            if (!leads.isEmpty()) {
-                String prompt2 = String.format("I have found %d leads! \nI would now generate pitches for them!",leads.size());
-                telexClient.sendInstruction(channelId, prompt2);
-                List<String> pitches = generatePitches(details,leads);
-                for (String pitch: pitches) {
-                    telexClient.sendInstruction(channelId," Here is a pitch for you \n" + pitch);
+            PeopleSearchRequest peopleSearchRequest = new PeopleSearchRequest();
+            peopleSearchRequest.setKeyword(details.getKeyword());
+            peopleSearchRequest.setLocation(details.getLocation());
+
+            leadPeopleResearchService.queryLeads(channelId, peopleSearchRequest);
+            generateAndSendResearch(channelId, details);
+
+            List<PeopleLeadDto> leads = leadPeopleResearchService.queryLeads(channelId, peopleSearchRequest);
+
+            if (leads.isEmpty()) {
+                telexClient.sendInstruction(channelId, "🔍 No matching profiles found.");
+            } else {
+                List<String> pitches = generatePitches(details, leads);
+                for (String pitch : pitches) {
+                    telexClient.sendInstruction(channelId, pitch);
                 }
             }
-
-            String prompt3 = "I'll now conduct researches on "
-                    +details.getCompanySizes() + " "+ details.getBusinessType() + " companies in " + details.getLocations() +
-                    " to compile a list of potential leads. Please hold on while we work on this.";
-
-            telexClient.sendInstruction(channelId, prompt3);
-
-            generateAndSendResearch(channelId, details);
 
             exitProcess(channelId);
 
@@ -143,11 +140,11 @@ public class OpenAIChatService {
     
             Rules:
             1. "businessType": Singular form (e.g., "tech startup" → "tech startup").
-            2. "locations": Comma-separated if multiple (e.g., "Berlin, Munich").
-            3. "companySizes": Standardize to "small", "mid-sized", or "large".
+            2. "location": Comma-separated if multiple (e.g., "Berlin, Munich").
+            3. "keyword": Singular form (e.g., "software engineer" → "software engineer").
     
             Return ONLY valid JSON. Example:
-            {"businessType": "law firm", "locations": "London", "companySizes": "mid-sized"}
+            {"businessType": "laundromats", "location": "lagos", "keyword": "software engineer"}
             """, userInput);
 
         String response = chatModel.call(prompt);
@@ -158,13 +155,13 @@ public class OpenAIChatService {
         try {
             // Generate research
             String researchPrompt = String.format("""
-                Provide a detailed business lead research on %s %ss companies in %s.
+                Provide a detailed business lead research on %s companies in %s.
                 Include:
                 1. List of 5-10 potential leads with brief descriptions
                 2. Key market trends in this sector
                 3. Recommended outreach approach
                 """,
-                    details.getCompanySizes(), details.getBusinessType(), details.getLocations());
+                    details.getBusinessType(), details.getLocation());
 
             String research = chatModel.call(researchPrompt);
             telexClient.sendInstruction(channelId, research);
@@ -176,27 +173,26 @@ public class OpenAIChatService {
         }
     }
 
-    private List<String> generatePitches(LeadDetails details, List<RapidLeadDto> leads) throws JsonProcessingException {
+    private List<String> generatePitches(LeadDetails details, List<PeopleLeadDto> leads) throws JsonProcessingException {
         List<String> pitches = new ArrayList<>();
-        for (RapidLeadDto lead : leads) {
+        for (PeopleLeadDto lead : leads) {
             String samplePitch = String.format("""
                             Pitch
                             ---
-                            I hope this message finds you well. I lead [Company name] - a firm dedicated to helping %s companies %s.
-                            We understand that every business faces unique challenges, and our tailored approach has empowered companies like [Example Client]. We specialize in [specific service] and believe we could add significant value to your operations.
+                            I hope this message finds you well. I lead %s - a firm dedicated to helping %s.
+                            We understand that every business faces unique challenges, and our tailored approach has empowered [Example Client]. We specialize in [specific service] and believe we could add significant value to your operations.
                             Would you be available for a brief call next week to discuss how we might support your goals?
                             """,
-                    details.getCompanySizes(),
-                    details.getBusinessType().isEmpty() ? "streamline operations and drive sustainable growth" : details.getBusinessType());
+                    details.getBusinessType(), details.getKeyword());
             String prompt = String.format("""
-                            Generate a short pitch personalized for %s , a %s company, located in %s. Also create a place for my name \s
+                            Generate a short pitch personalized for %s , a %s, located in %s. Also create a place for my name \s
                              and my company.
                              use sample pitch to improve your response.
                              sample pitch : %s
                             """,
-                    lead.getName(),
-                    details.getCompanySizes(),
-                    details.getLocations(),
+                    lead.getFullName(),
+                    details.getKeyword(),
+                    details.getLocation(),
                     samplePitch);
             String pitch = chatModel.call(prompt);
             pitches.add(pitch);
@@ -250,84 +246,4 @@ public class OpenAIChatService {
         return response.equals("true");
     }
 
-    private String classifyCompanySize(String companySize) {
-        if (companySize == null || companySize.isEmpty()) {
-            return "C";
-        }
-
-        companySize = companySize.toLowerCase().trim();
-
-        return switch (companySize) {
-            case "large" -> "G";
-            case "very large" -> "I";
-            case "mid-sized", "medium" -> "D";
-            case "small" -> "B";
-            default -> "C";
-        };
-    }
-
-    private CompanySearchRequest convertToCompanySearchRequest(LeadDetails details) {
-        CompanySearchRequest request = new CompanySearchRequest();
-
-        // Set keyword from businessType
-        request.setKeyword(details.getBusinessType());
-
-        // Parse locations (assuming comma-separated string like "Lagos,New York")
-        if (details.getLocations() != null && !details.getLocations().isEmpty()) {
-            List<Integer> locationIds = Arrays.stream(details.getLocations().split(","))
-                    .map(String::trim)
-                    .map(this::convertLocationToId)
-                    .filter(Objects::nonNull)
-                    .toList();
-            request.setLocations(locationIds);
-        }
-
-        // Convert company sizes
-        if (details.getCompanySizes() != null && !details.getCompanySizes().isEmpty()) {
-            List<CompanySize> companySizes = Arrays.stream(details.getCompanySizes().split(","))
-                    .map(String::trim)
-                    .map(this::convertToCompanySize)
-                    .filter(Objects::nonNull)
-                    .toList();
-            request.setCompanySizes(companySizes);
-        }
-
-        return request;
-    }
-
-    private Integer convertLocationToId(String locationName) {
-        Map<String, Integer> locationMap =Map.ofEntries(
-                entry("US", 103644278),
-                entry("Lagos", 104197452),
-                entry("Nigeria",105365761),
-                entry("ABUJA, FCT Nigeria", 101711968),
-                entry("London Area, United Kingdom", 90009496),
-                entry("Lekki, Lagos State, Nigeria", 111964948),
-                entry("Ibeju Lekki, Lagos State, Nigeria", 105956099),
-                entry("Ikorodu, Lagos State, Nigeria", 103510932),
-                entry("Agege, Lagos State, Nigeria", 100686593),
-                entry("Port Harcourt, Rivers State, Nigeria", 114378074),
-                entry("Ibadan, Oyo State, Nigeria", 110864965),
-                entry("Kaduna, Kaduna State, Nigeria", 103668447),
-                entry("Worldwide", 92000000),
-                entry("Dubai, United Arab Emirates", 106204383),
-                entry("Asia", 102393603),
-                entry("North America", 102221843)
-        );
-        return locationMap.getOrDefault(locationName, null);
-    }
-
-    private CompanySize convertToCompanySize(String sizeString) {
-        return switch (sizeString.toLowerCase()) {
-            case "b" -> CompanySize.B;
-            case "c" -> CompanySize.C;
-            case "d" -> CompanySize.D;
-            case "e" -> CompanySize.E;
-            case "f" -> CompanySize.F;
-            case "g" -> CompanySize.G;
-            case "h" -> CompanySize.H;
-            case "i" -> CompanySize.I;
-            default -> null;
-        };
-    }
 }
