@@ -30,9 +30,11 @@ build/
 !**/src/test/**/build/
 
 ### VS Code ###
-.vscode/
 
 application.properties
 
 
 src/main/java/integrations/telex/salesagent/lead/controller/CompanySearchController.java
+temp_auto_push.bat
+temp_interactive_push.bat
+.gitignore

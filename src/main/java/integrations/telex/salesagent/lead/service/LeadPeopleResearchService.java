@@ -35,11 +35,12 @@ public class LeadPeopleResearchService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final TelexClient telexClient;
+    private final LocationMappingService locationMappingService;
 
     public List<PeopleLeadDto> queryLeads(String channelID, PeopleSearchRequest request) {
         try {
             // Build URL with location filter
-            String searchUrl = request.buildLinkedInSearchUrl();
+            String searchUrl = buildLinkedInSearchUrl(request);
             log.info("Constructed LinkedIn search URL: {}", searchUrl);
 
             // Make API call
@@ -132,5 +133,19 @@ public class LeadPeopleResearchService {
             log.error("Error parsing API response: {}", e.getMessage(), e);
         }
         return leads;
+    }
+
+    private String buildLinkedInSearchUrl(PeopleSearchRequest request) {
+        StringBuilder urlBuilder = new StringBuilder("https://www.linkedin.com/search/results/people/?");
+
+        if (request.getLocation() != null && !request.getLocation().isEmpty()) {
+            String geoUrn = locationMappingService.getGeoUrnForLocation(request.getLocation());
+            if (geoUrn != null) {
+                urlBuilder.append("geoUrn=%5B%22").append(geoUrn).append("%22%5D&");
+            }
+        }
+
+        urlBuilder.append("origin=FACETED_SEARCH");
+        return urlBuilder.toString();
     }
 }
